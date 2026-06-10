@@ -2064,13 +2064,6 @@
               persp: persp
     });
 
-    navToggle.addEventListener('click', function() {
-      navLinks.classList.toggle('open');
-    });
-
-    document.querySelectorAll('.nav-links a').forEach(function(link) {
-      link.addEventListener('click', function() { navLinks.classList.remove('open'); });
-    });
           }
           pc.push(row);
         }
@@ -2359,18 +2352,6 @@
         delay = d + 80;
       });
     })();
-
-    // ─── ACTIVE NAV ───
-    var sections = document.querySelectorAll('section[id]');
-    window.addEventListener('scroll', function() {
-      var current = '';
-      sections.forEach(function(s) {
-        if (window.scrollY >= s.offsetTop - 120) current = s.getAttribute('id');
-      });
-      document.querySelectorAll('.nav-links a:not(.nav-cta)').forEach(function(a) {
-        a.classList.toggle('active', a.getAttribute('href') === '#' + current);
-      });
-    });
 
     // ─── FORM (with FormSubmit AJAX) ───
     document.getElementById('contactForm').addEventListener('submit', function(e) {
