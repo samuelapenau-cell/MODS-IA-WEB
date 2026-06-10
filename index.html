@@ -1348,11 +1348,14 @@
         transform: translateY(-110%); opacity: 0; transition: var(--transition); pointer-events: none;
       }
       .nav-links.open { transform: translateY(0); opacity: 1; pointer-events: all; }
-      .nav-links a { width: 100%; padding: 0.6rem 0.9rem; }
+      .nav-links a { width: 100%; padding: 0.8rem 1rem; font-size: 0.95rem; }
       .nav-toggle { display: flex; }
       .hero { padding: 0 1rem; padding-top: 80px; min-height: auto; padding-bottom: 60px; }
       .hero h1 .wordmark { letter-spacing: -1px; }
+      .hero-tag { font-size: 0.8rem; }
       .hero-stats { flex-direction: column; gap: 1.5rem; }
+      .hero-stat h3 { font-size: 1.8rem; }
+      .hero-actions { flex-direction: column; gap: 0.75rem; }
       .section-w { padding: 70px 1rem; }
       .about-grid { grid-template-columns: 1fr; }
       .about-cards { grid-template-columns: 1fr; }
@@ -1365,8 +1368,13 @@
       .contact-grid { grid-template-columns: 1fr; }
       .form-row { grid-template-columns: 1fr; }
       .banner { padding: 60px 1rem; }
-      .hero-actions { flex-direction: column; }
-      .btn { justify-content: center; }
+      .glow-blob-1 { width: 220px; height: 220px; }
+      .glow-blob-2 { width: 180px; height: 180px; }
+      .glow-blob-3 { width: 140px; height: 140px; }
+      .footer-meta { flex-wrap: wrap; gap: 1rem; justify-content: center; }
+      .form-success { padding: 2rem 1.5rem; }
+      .contact-info-text { font-size: 0.95rem; }
+      button[type="submit"] { width: 100% !important; }
     }
 
     @media (min-width: 769px) and (max-width: 900px) {
@@ -1378,6 +1386,34 @@
       .hero h1 .wordmark { font-size: 1em; }
       .hero-visual { min-height: 220px; }
       .hero-visual-inner { max-width: 200px; }
+      .hero-stat h3 { font-size: 1.5rem; }
+      .section-w { padding: 50px 1rem; }
+      .about-card { padding: 1.25rem; }
+      .problem-card { padding: 1.5rem 1.25rem; }
+      .solution-item { padding: 1rem; }
+      .method-step { padding: 1.5rem 1.25rem; }
+      .method-step-num { font-size: 2.2rem; }
+      .market-card { padding: 1.75rem 1.25rem 1.5rem; }
+      .business-card { padding: 1.75rem 1.25rem; }
+      .contact-channel { padding: 0.75rem 1rem; }
+      .about-claim { font-size: 1.2rem; }
+      .banner h2 { font-size: 1.6rem; }
+      .btn { justify-content: center; }
+    }
+
+    @media (max-width: 375px) {
+      .nav-logo-img { height: 80px; }
+      footer .nav-logo-img { height: 60px; }
+      .hero h1 { font-size: 1.7rem; }
+      .hero-visual { min-height: 180px; }
+      .hero-visual-inner { max-width: 160px; }
+      .hero-stat h3 { font-size: 1.3rem; }
+      .section-w { padding: 40px 0.75rem; }
+      .method-step-num { font-size: 1.8rem; }
+      .about-claim { font-size: 1rem; }
+      .banner h2 { font-size: 1.3rem; }
+      .banner p { font-size: 0.85rem; }
+      .contact-info-text { font-size: 0.85rem; }
     }
   </style>
 </head>
