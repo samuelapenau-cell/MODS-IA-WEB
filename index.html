@@ -895,19 +895,10 @@
       line-height: 1.8;
     }
 
-    .contact-channel {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.9rem 1.1rem;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      margin-bottom: 0.7rem;
-      transition: var(--transition);
-    }
-
+    .contact-channel { display: flex; align-items: center; gap: 0.75rem; padding: 0.9rem 1.1rem; background: rgba(18, 19, 28, 0.6); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 0.7rem; transition: var(--transition); }
     .contact-channel:hover { border-color: rgba(81, 112, 255, 0.2); }
+    a.contact-channel { text-decoration: none; color: inherit; }
+    a.contact-channel:hover { border-color: rgba(81, 112, 255, 0.2); }
 
     .contact-channel-icon {
       font-family: 'JetBrains Mono', monospace;
@@ -1727,6 +1718,16 @@
             <span class="contact-channel-icon">💬</span>
             <div><h5>WhatsApp</h5><p>(+58) 0412-7507084</p></div>
           </div>
+          <a href="https://www.instagram.com/weare.mods" target="_blank" rel="noopener noreferrer" class="contact-channel stagger-item" style="text-decoration:none;">
+            <span class="contact-channel-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                <circle cx="12" cy="12" r="5"/>
+                <circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/>
+              </svg>
+            </span>
+            <div><h5>Instagram</h5><p>@weare.mods</p></div>
+          </a>
         </div>
         <form class="contact-form reveal" id="contactForm">
           <div class="form-body">
@@ -1786,6 +1787,7 @@
       <li><a href="#solution">Solución</a></li>
       <li><a href="#methodology">Metodología</a></li>
       <li><a href="#contact">Contacto</a></li>
+      <li><a href="https://www.instagram.com/weare.mods" target="_blank" rel="noopener noreferrer">Instagram</a></li>
     </ul>
     <p class="footer-copy">&copy; 2026 MODS IA. Todos los derechos reservados.</p>
   </footer>
