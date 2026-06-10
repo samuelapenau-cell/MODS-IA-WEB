@@ -1765,27 +1765,26 @@
       <div class="contact-grid">
         <form class="contact-form reveal" id="contactForm" action="https://formsubmit.co/Mods.agency.ia@gmail.com" method="POST">
           <div class="form-body">
-            <input type="hidden" name="_captcha" value="false">
             <input type="hidden" name="_template" value="table">
             <input type="hidden" name="_next" value="">
             <div class="form-row">
               <div class="form-group">
                 <label for="name">Nombre</label>
-                <input type="text" name="Nombre" id="name" placeholder="Tu nombre" required>
+                <input type="text" name="Nombre" id="name" placeholder="Tu nombre" required maxlength="100">
               </div>
               <div class="form-group">
                 <label for="email">Email</label>
-                <input type="email" name="Email" id="email" placeholder="tu@email.com" required>
+                <input type="email" name="Email" id="email" placeholder="tu@email.com" required maxlength="200">
               </div>
             </div>
             <div class="form-row">
               <div class="form-group">
                 <label for="phone">Teléfono</label>
-                <input type="tel" name="Telefono" id="phone" placeholder="+58 0412-0000000">
+                <input type="tel" name="Telefono" id="phone" placeholder="+58 0412-0000000" maxlength="20">
               </div>
               <div class="form-group">
                 <label for="company">Empresa</label>
-                <input type="text" name="Empresa" id="company" placeholder="Nombre de tu empresa">
+                <input type="text" name="Empresa" id="company" placeholder="Nombre de tu empresa" maxlength="200">
               </div>
             </div>
             <div class="form-group">
@@ -1800,7 +1799,7 @@
             </div>
             <div class="form-group">
               <label for="message">Cuéntanos más</label>
-              <textarea name="Mensaje" id="message" placeholder="Describe brevemente tu situación o lo que necesitas..." required></textarea>
+              <textarea name="Mensaje" id="message" placeholder="Describe brevemente tu situación o lo que necesitas..." required maxlength="2000"></textarea>
             </div>
             <button type="submit" class="btn btn-primary" style="align-self: flex-start;">
               Enviar mensaje
@@ -2353,56 +2352,98 @@
       });
     })();
 
-    // ─── FORM (with FormSubmit AJAX) ───
-    document.getElementById('contactForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      var form = this;
-      var body = form.querySelector('.form-body');
-      var success = form.querySelector('.form-success');
-      var btn = form.querySelector('button[type="submit"]');
-      var originalText = btn.innerHTML;
+    // ─── FORM (with FormSubmit AJAX + validation + rate-limit) ───
+    (function() {
+      var form = document.getElementById('contactForm');
+      if (!form) return;
+      var lastSubmit = 0;
 
-      btn.disabled = true;
-      btn.innerHTML = 'Enviando...';
+      function sanitize(str) {
+        var d = document.createElement('div');
+        d.textContent = str;
+        return d.textContent;
+      }
 
-      var data = {
-        Nombre: form.querySelector('[name="Nombre"]').value,
-        Email: form.querySelector('[name="Email"]').value,
-        Telefono: form.querySelector('[name="Telefono"]').value,
-        Empresa: form.querySelector('[name="Empresa"]').value,
-        Interes: form.querySelector('[name="Interes"]').value,
-        Mensaje: form.querySelector('[name="Mensaje"]').value
-      };
+      function validate(data) {
+        var errors = [];
+        if (data.Nombre.trim().length < 2) errors.push('El nombre debe tener al menos 2 caracteres.');
+        if (data.Nombre.length > 100) errors.push('El nombre es demasiado largo.');
+        var emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRe.test(data.Email)) errors.push('Ingresa un email válido.');
+        if (data.Email.length > 200) errors.push('El email es demasiado largo.');
+        if (data.Telefono && data.Telefono.trim()) {
+          if (data.Telefono.length > 20) errors.push('El teléfono es demasiado largo.');
+          var phoneClean = data.Telefono.replace(/[\s\-\(\)\+]/g, '');
+          if (phoneClean.length < 7) errors.push('Ingresa un teléfono válido.');
+        }
+        if (data.Empresa && data.Empresa.length > 200) errors.push('El nombre de empresa es demasiado largo.');
+        if (data.Mensaje.trim().length < 10) errors.push('El mensaje debe tener al menos 10 caracteres.');
+        if (data.Mensaje.length > 2000) errors.push('El mensaje es demasiado largo.');
+        return errors;
+      }
 
-      fetch('https://formsubmit.co/ajax/Mods.agency.ia@gmail.com', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify(data)
-      })
-      .then(function(res) { return res.json(); })
-      .then(function(json) {
-        if (json.success) {
-          body.classList.add('is-submitted');
-          setTimeout(function() { success.classList.add('visible'); }, 200);
-          setTimeout(function() {
-            body.classList.remove('is-submitted');
-            success.classList.remove('visible');
-            form.reset();
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var now = Date.now();
+        if (now - lastSubmit < 30000) {
+          alert('Ya enviaste un mensaje recientemente. Espera 30 segundos.');
+          return;
+        }
+
+        var body = form.querySelector('.form-body');
+        var success = form.querySelector('.form-success');
+        var btn = form.querySelector('button[type="submit"]');
+        var originalText = btn.innerHTML;
+
+        var data = {
+          Nombre: sanitize(form.querySelector('[name="Nombre"]').value),
+          Email: sanitize(form.querySelector('[name="Email"]').value),
+          Telefono: sanitize(form.querySelector('[name="Telefono"]').value),
+          Empresa: sanitize(form.querySelector('[name="Empresa"]').value),
+          Interes: form.querySelector('[name="Interes"]').value,
+          Mensaje: sanitize(form.querySelector('[name="Mensaje"]').value)
+        };
+
+        var errs = validate(data);
+        if (errs.length) {
+          alert(errs.join('\n'));
+          return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = 'Enviando...';
+
+        fetch('https://formsubmit.co/ajax/Mods.agency.ia@gmail.com', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify(data)
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(json) {
+          if (json.success) {
+            lastSubmit = Date.now();
+            body.classList.add('is-submitted');
+            setTimeout(function() { success.classList.add('visible'); }, 200);
+            setTimeout(function() {
+              body.classList.remove('is-submitted');
+              success.classList.remove('visible');
+              form.reset();
+              btn.disabled = false;
+              btn.innerHTML = originalText;
+            }, 5000);
+          } else {
+            alert('Error al enviar. Intenta de nuevo.');
             btn.disabled = false;
             btn.innerHTML = originalText;
-          }, 5000);
-        } else {
-          alert('Error al enviar. Intenta de nuevo.');
+          }
+        })
+        .catch(function() {
+          alert('Error de conexión. Intenta de nuevo.');
           btn.disabled = false;
           btn.innerHTML = originalText;
-        }
-      })
-      .catch(function() {
-        alert('Error de conexión. Intenta de nuevo.');
-        btn.disabled = false;
-        btn.innerHTML = originalText;
+        });
       });
-    });
+    })();
 
     // ─── CURSOR FOLLOWER ───
     (function() {
