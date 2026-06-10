@@ -1729,25 +1729,28 @@
             <div><h5>Instagram</h5><p>@weare.mods</p></div>
           </a>
         </div>
-        <form class="contact-form reveal" id="contactForm">
+        <form class="contact-form reveal" id="contactForm" action="https://formsubmit.co/Mods.agency.ia@gmail.com" method="POST">
           <div class="form-body">
+            <input type="hidden" name="_captcha" value="false">
+            <input type="hidden" name="_template" value="table">
+            <input type="hidden" name="_next" value="">
             <div class="form-row">
               <div class="form-group">
                 <label for="name">Nombre</label>
-                <input type="text" id="name" placeholder="Tu nombre" required>
+                <input type="text" name="Nombre" id="name" placeholder="Tu nombre" required>
               </div>
               <div class="form-group">
                 <label for="email">Email</label>
-                <input type="email" id="email" placeholder="tu@email.com" required>
+                <input type="email" name="Email" id="email" placeholder="tu@email.com" required>
               </div>
             </div>
             <div class="form-group">
               <label for="company">Empresa</label>
-              <input type="text" id="company" placeholder="Nombre de tu empresa">
+              <input type="text" name="Empresa" id="company" placeholder="Nombre de tu empresa">
             </div>
             <div class="form-group">
               <label for="service">Interés</label>
-              <select id="service">
+              <select name="Interes" id="service">
                 <option value="">Selecciona</option>
                 <option value="consultoria">Consultoría en automatización</option>
                 <option value="implementacion">Implementación de soluciones</option>
@@ -1757,7 +1760,7 @@
             </div>
             <div class="form-group">
               <label for="message">Cuéntanos más</label>
-              <textarea id="message" placeholder="Describe brevemente tu situación o lo que necesitas..."></textarea>
+              <textarea name="Mensaje" id="message" placeholder="Describe brevemente tu situación o lo que necesitas..." required></textarea>
             </div>
             <button type="submit" class="btn btn-primary" style="align-self: flex-start;">
               Enviar mensaje
@@ -2297,23 +2300,54 @@
       });
     });
 
-    // ─── FORM (with success celebration) ───
+    // ─── FORM (with FormSubmit AJAX) ───
     document.getElementById('contactForm').addEventListener('submit', function(e) {
       e.preventDefault();
       var form = this;
       var body = form.querySelector('.form-body');
       var success = form.querySelector('.form-success');
+      var btn = form.querySelector('button[type="submit"]');
+      var originalText = btn.innerHTML;
 
-      body.classList.add('is-submitted');
-      setTimeout(function() {
-        success.classList.add('visible');
-      }, 200);
+      btn.disabled = true;
+      btn.innerHTML = 'Enviando...';
 
-      setTimeout(function() {
-        body.classList.remove('is-submitted');
-        success.classList.remove('visible');
-        form.reset();
-      }, 5000);
+      var data = {
+        Nombre: form.querySelector('[name="Nombre"]').value,
+        Email: form.querySelector('[name="Email"]').value,
+        Empresa: form.querySelector('[name="Empresa"]').value,
+        Interes: form.querySelector('[name="Interes"]').value,
+        Mensaje: form.querySelector('[name="Mensaje"]').value
+      };
+
+      fetch('https://formsubmit.co/ajax/Mods.agency.ia@gmail.com', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(data)
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(json) {
+        if (json.success) {
+          body.classList.add('is-submitted');
+          setTimeout(function() { success.classList.add('visible'); }, 200);
+          setTimeout(function() {
+            body.classList.remove('is-submitted');
+            success.classList.remove('visible');
+            form.reset();
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+          }, 5000);
+        } else {
+          alert('Error al enviar. Intenta de nuevo.');
+          btn.disabled = false;
+          btn.innerHTML = originalText;
+        }
+      })
+      .catch(function() {
+        alert('Error de conexión. Intenta de nuevo.');
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      });
     });
 
     // ─── CURSOR FOLLOWER ───
