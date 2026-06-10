@@ -1,0 +1,2441 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MODS IA — Agencia de Consultoría en Automatización Inteligente</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;900&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #07080B;
+      --surface: #12131C;
+      --card: #1A1C2A;
+      --border: #2A2B3E;
+      --primary: #5170ff;
+      --primary-dim: #3B54D4;
+      --primary-light: #7B92FF;
+      --accent-bg: #cbd4ff;
+      --text: #E8E8F0;
+      --muted: #8B8DA3;
+      --dim: #4A4B5E;
+      --gradient-1: linear-gradient(135deg, #5170ff, #7B92FF);
+      --gradient-2: linear-gradient(135deg, #5170ff, #3B54D4);
+      --gradient-3: linear-gradient(135deg, #3B54D4, #5170ff);
+      --radius: 12px;
+      --radius-sm: 6px;
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --transition: 0.4s var(--ease);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    ::selection { background: rgba(81, 112, 255, 0.3); }
+
+    /* ─── SIGNATURE: MODULAR GRID ─── */
+    .mod-grid {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+      opacity: 1;
+    }
+
+    .mod-grid-inner {
+      display: grid;
+      grid-template-columns: repeat(24, 1fr);
+      gap: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .mod-cell {
+      aspect-ratio: 1;
+      min-width: 0;
+      min-height: 0;
+      background: rgba(255, 255, 255, 0.012);
+      border-right: 1px solid rgba(255, 255, 255, 0.015);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.015);
+      transition: background 0.6s ease, box-shadow 0.6s ease;
+      will-change: background, box-shadow;
+    }
+
+    .noise-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+      opacity: 0.025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-repeat: repeat;
+      background-size: 200px 200px;
+    }
+
+    /* ─── NAVBAR ─── */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 0 2.5rem;
+      height: 68px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(7, 8, 11, 0.7);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid transparent;
+      transition: var(--transition);
+    }
+
+    .navbar.scrolled {
+      background: rgba(7, 8, 11, 0.92);
+      border-bottom-color: rgba(42, 43, 62, 0.5);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text);
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 1.2rem;
+      letter-spacing: -0.5px;
+    }
+
+    .nav-logo-img {
+      height: 125px;
+      width: auto;
+      display: block;
+      filter: brightness(1.3) contrast(1.15) drop-shadow(0 0 20px rgba(81,112,255,0.12));
+      transition: filter 0.3s ease;
+    }
+    .nav-logo {
+      overflow: visible;
+    }
+    .nav-logo:hover .nav-logo-img {
+      filter: brightness(1.5) contrast(1.2) drop-shadow(0 0 30px rgba(81,112,255,0.2));
+    }
+    @media (max-width: 768px) {
+      .nav-logo-img { height: 64px; }
+    }
+    @media (max-width: 500px) {
+      .nav-logo-img { height: 50px; }
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 0.15rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 500;
+      padding: 0.4rem 0.9rem;
+      border-radius: var(--radius-sm);
+      transition: var(--transition);
+      letter-spacing: 0.2px;
+    }
+
+    .nav-links a:hover { color: var(--text); background: rgba(255, 255, 255, 0.04); }
+
+    .nav-cta {
+      background: var(--gradient-1);
+      color: #07080B !important;
+      font-weight: 600 !important;
+      padding: 0.4rem 1.25rem !important;
+      border-radius: var(--radius-sm) !important;
+      letter-spacing: 0 !important;
+    }
+
+    .nav-cta:hover { opacity: 0.9; }
+
+    .nav-toggle {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 4px;
+    }
+
+    .nav-toggle span {
+      width: 22px;
+      height: 2px;
+      background: var(--text);
+      border-radius: 2px;
+      transition: var(--transition);
+    }
+
+    /* ─── HERO ─── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 0 2.5rem;
+      padding-top: 68px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero > .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      width: 100%;
+      position: relative;
+      z-index: 2;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: center;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--primary-light);
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-tag::before {
+      content: '>';
+      color: var(--primary);
+    }
+
+    .hero-tag .blink {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      background: var(--primary-light);
+      border-radius: 50%;
+      animation: blink-pulse 1.4s ease-in-out infinite;
+      margin-left: 4px;
+    }
+
+    @keyframes blink-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.3; transform: scale(0.7); }
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .hero h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(2.8rem, 5.5vw, 4.8rem);
+      font-weight: 900;
+      letter-spacing: -2px;
+      line-height: 1.02;
+      margin-bottom: 1.2rem;
+    }
+
+    .hero h1 .wordmark {
+      display: block;
+      font-size: 1.15em;
+      background: var(--gradient-1);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -3px;
+    }
+
+    .hero p {
+      font-size: clamp(1rem, 1.3vw, 1.1rem);
+      color: var(--muted);
+      max-width: 520px;
+      line-height: 1.8;
+      margin-bottom: 2.5rem;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0.85rem 2rem;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-decoration: none;
+      transition: var(--transition);
+      cursor: pointer;
+      border: none;
+      font-family: inherit;
+      position: relative;
+    }
+
+    .btn-primary {
+      background: var(--gradient-1);
+      color: #07080B;
+      box-shadow: 0 4px 24px rgba(81, 112, 255, 0.25);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px rgba(81, 112, 255, 0.35);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--primary);
+      background: rgba(81, 112, 255, 0.06);
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 3rem;
+      margin-top: 3.5rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .hero-stat h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 700;
+      letter-spacing: -1px;
+      color: var(--primary);
+      line-height: 1;
+    }
+
+    .hero-stat p {
+      font-size: 0.8rem;
+      color: var(--dim);
+      margin: 0;
+      margin-top: 0.2rem;
+    }
+
+    /* ─── HERO VISUAL ─── */
+    .hero-visual {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 400px;
+    }
+
+    .hero-visual-inner {
+      position: relative;
+      width: 100%;
+      max-width: 500px;
+      aspect-ratio: 1;
+      margin: 0 auto;
+      filter: drop-shadow(0 0 40px rgba(81,112,255,0.08));
+    }
+
+    #globeCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      border-radius: 50%;
+    }
+
+    .hero-visual-ring {
+      position: absolute;
+      inset: -6%;
+      border-radius: 50%;
+      border: 1px solid rgba(81,112,255,0.06);
+      pointer-events: none;
+      animation: hero-ring-pulse 4s ease-in-out infinite;
+    }
+    .hero-visual-ring:nth-child(3) {
+      inset: -12%;
+      border-color: rgba(123,146,255,0.03);
+      animation-delay: -2s;
+    }
+    @keyframes hero-ring-pulse {
+      0%, 100% { transform: scale(1); opacity: 0.5; }
+      50% { transform: scale(1.03); opacity: 1; }
+    }
+
+    /* ─── SECTIONS COMMON ─── */
+    section { position: relative; z-index: 2; }
+
+    .section-w {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 110px 2.5rem;
+    }
+
+    .section-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 2.5px;
+      color: var(--primary);
+      margin-bottom: 0.75rem;
+      display: block;
+    }
+
+    .section-tag::before {
+      content: '// ';
+      color: var(--primary-light);
+      font-weight: 400;
+    }
+
+    .section-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(1.8rem, 3.5vw, 3rem);
+      font-weight: 700;
+      letter-spacing: -1.5px;
+      line-height: 1.1;
+      margin-bottom: 0.75rem;
+    }
+
+    .section-desc {
+      color: var(--muted);
+      font-size: 1rem;
+      max-width: 580px;
+      line-height: 1.8;
+    }
+
+    /* ─── ABOUT ─── */
+    #about { background: var(--surface); }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      margin-top: 2.5rem;
+    }
+
+    .about-claim {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 500;
+      letter-spacing: -0.5px;
+      line-height: 1.5;
+      color: var(--text);
+      margin-bottom: 1.5rem;
+    }
+
+    .about-claim em {
+      font-style: normal;
+      color: var(--primary);
+    }
+
+    .about-text p {
+      color: var(--muted);
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+    }
+
+    .about-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .about-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .about-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--gradient-1);
+      opacity: 0;
+      transition: var(--transition);
+    }
+
+    .about-card:hover::after { opacity: 1; }
+
+
+    .about-card-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--dim);
+      margin-bottom: 0.5rem;
+    }
+
+    .about-card h4 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+    }
+
+    .about-card p {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    /* ─── PROBLEMS ─── */
+    #problems { background: var(--bg); }
+
+    .problems-intro {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      margin-top: 2.5rem;
+      margin-bottom: 3rem;
+    }
+
+    .problems-intro p {
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.8;
+    }
+
+    .problems-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .problem-card {
+      background: var(--surface);
+      padding: 2rem 1.5rem;
+      transition: var(--transition);
+      position: relative;
+    }
+
+    .problem-card:hover { background: #1A1D30; }
+
+    .problem-card-icon {
+      font-size: 0.85rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 500;
+      color: var(--primary);
+      margin-bottom: 0.75rem;
+      letter-spacing: 1px;
+    }
+
+    .problem-card h4 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .problem-card p {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.7;
+      margin: 0;
+    }
+
+    /* ─── SOLUTION ─── */
+    #solution { background: var(--surface); }
+
+    .solution-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      margin-top: 2.5rem;
+    }
+
+    .solution-item {
+      display: flex;
+      gap: 1rem;
+      padding: 1.25rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      margin-bottom: 0.75rem;
+      transition: var(--transition);
+      align-items: flex-start;
+    }
+
+
+
+    .solution-item-marker {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--primary-light);
+      min-width: 20px;
+      padding-top: 1px;
+    }
+
+    .solution-item h4 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 0.15rem;
+    }
+
+    .solution-item p {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    .solution-terminal {
+      background: #0C0D14;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.8;
+    }
+
+    .terminal-header {
+      display: flex;
+      gap: 6px;
+      padding: 0.75rem 1rem;
+      background: rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .terminal-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .terminal-dot:nth-child(1) { background: #FF5F56; }
+    .terminal-dot:nth-child(2) { background: #FFBD2E; }
+    .terminal-dot:nth-child(3) { background: #27C93F; }
+
+    .terminal-body { padding: 1.25rem 1.25rem 1.5rem; }
+
+    .terminal-line { color: var(--muted); margin-bottom: 0.3rem; }
+
+    .terminal-line .prompt { color: var(--primary-light); }
+    .terminal-line .cmd { color: var(--text); }
+    .terminal-line .output { color: var(--accent-bg); }
+    .terminal-line .output-ok { color: #27C93F; }
+    .terminal-line .cursor-blink { animation: blink 1s step-end infinite; }
+
+    /* ─── METHODOLOGY ─── */
+    #methodology { background: var(--bg); }
+
+    .methodology-flow {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 1px;
+      margin-top: 2.5rem;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .method-step {
+      background: var(--surface);
+      padding: 2rem 1.5rem;
+      text-align: center;
+      position: relative;
+      transition: var(--transition);
+    }
+
+    .method-step:hover { background: #1E2030; }
+
+    .method-step-num {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2.8rem;
+      font-weight: 900;
+      background: var(--gradient-1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      margin-bottom: 0.75rem;
+    }
+
+    .method-step h4 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+    }
+
+    .method-step p {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    /* ─── MARKET ─── */
+    #market {
+      background: linear-gradient(135deg, var(--surface) 0%, #12141f 100%);
+      border-top: 1px solid rgba(81,112,255,0.06);
+      border-bottom: 1px solid rgba(81,112,255,0.06);
+      position: relative;
+    }
+
+    .market-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      margin-top: 2.5rem;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .market-card {
+      background: var(--surface);
+      padding: 2.5rem 1.5rem 2rem;
+      text-align: center;
+      transition: var(--transition);
+      position: relative;
+    }
+
+    .market-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--gradient-1);
+      opacity: 0;
+      transition: var(--transition);
+    }
+
+    .market-card-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(81,112,255,0.08);
+      border: 1px solid rgba(81,112,255,0.12);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--primary-light);
+      margin-bottom: 1rem;
+      transition: var(--transition);
+    }
+
+    .market-card h4 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+      line-height: 1.4;
+    }
+
+    .market-card p {
+      font-size: 0.78rem;
+      color: var(--dim);
+      line-height: 1.65;
+      margin: 0;
+    }
+
+    /* ─── BUSINESS MODEL ─── */
+    #business { background: var(--bg); }
+
+    .business-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      margin-top: 2.5rem;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .business-card {
+      background: var(--surface);
+      padding: 2.5rem 2rem;
+      text-align: center;
+      transition: var(--transition);
+    }
+
+    .business-card:hover { background: #1E2030; }
+
+    .business-card-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--primary);
+      margin-bottom: 0.75rem;
+    }
+
+    .business-card h4 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .business-card p {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    /* ─── BANNER ─── */
+    .banner {
+      background: var(--surface);
+      border-top: 1px solid rgba(81,112,255,0.08);
+      border-bottom: 1px solid rgba(81,112,255,0.08);
+      text-align: center;
+      padding: 80px 2.5rem;
+      position: relative;
+    }
+
+    .banner::before,
+    .banner::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      width: 60%;
+      max-width: 400px;
+      height: 1px;
+      transform: translateX(-50%);
+      background: linear-gradient(90deg, transparent, rgba(81,112,255,0.3), transparent);
+    }
+    .banner::before { top: 0; }
+    .banner::after { bottom: 0; }
+
+    .banner h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      font-weight: 700;
+      letter-spacing: -1px;
+      max-width: 800px;
+      margin: 0 auto 1rem;
+    }
+
+    .banner h2 em {
+      font-style: normal;
+      background: var(--gradient-1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .banner p {
+      color: var(--muted);
+      max-width: 500px;
+      margin: 0 auto 2rem;
+      font-size: 0.95rem;
+    }
+
+    /* ─── CONTACT ─── */
+    #contact { background: var(--bg); }
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      margin-top: 2.5rem;
+    }
+
+    .contact-info-text {
+      font-size: 1.05rem;
+      color: var(--muted);
+      margin-bottom: 2rem;
+      line-height: 1.8;
+    }
+
+    .contact-channel {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.9rem 1.1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      margin-bottom: 0.7rem;
+      transition: var(--transition);
+    }
+
+    .contact-channel:hover { border-color: rgba(81, 112, 255, 0.2); }
+
+    .contact-channel-icon {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--primary-light);
+      min-width: 24px;
+    }
+
+    .contact-channel h5 { font-size: 0.85rem; font-weight: 500; }
+    .contact-channel p { font-size: 0.8rem; color: var(--dim); margin: 0; }
+
+    .contact-form { display: flex; flex-direction: column; gap: 1rem; }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+    .form-group label {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--dim);
+      margin-bottom: 0.35rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.9rem;
+      transition: var(--transition);
+      outline: none;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(81, 112, 255, 0.08);
+    }
+
+    .form-group textarea { resize: vertical; min-height: 110px; }
+
+    .form-group select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238B8DA3' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 1rem center;
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      position: relative;
+      z-index: 2;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      padding: 3rem 2.5rem;
+    }
+
+    footer .nav-logo { justify-content: center; margin-bottom: 0.75rem; }
+    footer .nav-logo-img { height: 150px; filter: brightness(1.3) contrast(1.15) drop-shadow(0 0 24px rgba(81,112,255,0.12)); }
+    @media (max-width: 768px) { footer .nav-logo-img { height: 90px; } }
+    @media (max-width: 500px) { footer .nav-logo-img { height: 70px; } }
+
+    footer > p { color: var(--dim); font-size: 0.82rem; }
+
+    .footer-meta {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 1rem;
+      list-style: none;
+    }
+
+    .footer-meta a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.82rem;
+      transition: var(--transition);
+    }
+
+    .footer-meta a:hover { color: var(--primary); }
+
+    .footer-copy { color: var(--dim) !important; font-size: 0.72rem !important; margin-top: 1.5rem !important; }
+
+    /* ─── REVEAL (enhanced with blur) ─── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      filter: blur(2px);
+      transition: opacity 0.7s var(--ease), transform 0.7s var(--ease), filter 0.7s var(--ease);
+    }
+
+    .reveal.visible { opacity: 1; transform: translateY(0); filter: blur(0); }
+
+    /* ─── WORD STAGGER (hero headline) ─── */
+    .word-char {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(30px);
+      filter: blur(4px);
+      transition: opacity 0.6s cubic-bezier(0.22,1,0.36,1),
+                  transform 0.6s cubic-bezier(0.22,1,0.36,1),
+                  filter 0.6s cubic-bezier(0.22,1,0.36,1);
+    }
+    .word-char.visible {
+      opacity: 1;
+      transform: translateY(0);
+      filter: blur(0);
+    }
+    .word-space { display: inline-block; }
+
+    /* ─── STAGGER ITEMS ─── */
+    .stagger-item {
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 0.5s var(--ease), transform 0.5s var(--ease);
+    }
+    .stagger-item.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .stagger-1 { transition-delay: 0ms; }
+    .stagger-2 { transition-delay: 80ms; }
+    .stagger-3 { transition-delay: 160ms; }
+    .stagger-4 { transition-delay: 240ms; }
+
+    /* ─── BUTTON PRESS ─── */
+    .btn:active {
+      transform: scale(0.97);
+      transition: transform 160ms cubic-bezier(0.22,1,0.36,1);
+    }
+
+
+
+    /* ─── FORM SUCCESS CELEBRATION ─── */
+    .contact-form {
+      position: relative;
+    }
+    .form-body {
+      transition: opacity 0.4s var(--ease), filter 0.4s var(--ease);
+    }
+    .form-body.is-submitted {
+      opacity: 0;
+      filter: blur(2px);
+      pointer-events: none;
+    }
+    .form-success {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      padding: 3rem 2rem;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 0.5s var(--ease) 0.3s, transform 0.5s var(--ease) 0.3s;
+      pointer-events: none;
+    }
+    .form-success.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .form-success-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #5170ff, #7B92FF);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      color: #07080B;
+      transform: scale(0);
+      transition: transform 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.4s;
+    }
+    .form-success.visible .form-success-icon {
+      transform: scale(1);
+    }
+    .form-success-text {
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.4s var(--ease) 0.5s, transform 0.4s var(--ease) 0.5s;
+      color: var(--text);
+    }
+    .form-success.visible .form-success-text {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ─── DECORATIVE GLOW BLOBS ─── */
+    .glow-blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .glow-blob-1 {
+      width: 400px; height: 400px;
+      background: rgba(81, 112, 255, 0.06);
+      top: -10%; right: -5%;
+      animation: blob-drift 22s ease-in-out infinite;
+    }
+    .glow-blob-2 {
+      width: 350px; height: 350px;
+      background: rgba(123, 146, 255, 0.05);
+      bottom: -15%; left: -8%;
+      animation: blob-drift 28s ease-in-out infinite reverse;
+    }
+    .glow-blob-3 {
+      width: 250px; height: 250px;
+      background: rgba(81, 112, 255, 0.04);
+      top: 40%; left: 30%;
+      animation: blob-drift 18s ease-in-out infinite;
+      animation-delay: -5s;
+    }
+
+    @keyframes blob-drift {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      25% { transform: translate(25px, -18px) scale(1.06); }
+      50% { transform: translate(-15px, 12px) scale(0.94); }
+      75% { transform: translate(18px, 20px) scale(1.02); }
+    }
+
+    /* ─── SHIMMER EFFECT ─── */
+    .shimmer-text {
+      background-size: 200% auto;
+      animation: shimmer-sweep 4s ease-in-out infinite;
+    }
+    @keyframes shimmer-sweep {
+      0% { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+
+    /* ─── PULSE RING ─── */
+    /* ─── FLOATING TECH DOTS ─── */
+    .float-dot {
+      position: absolute;
+      width: 3px; height: 3px;
+      border-radius: 50%;
+      background: rgba(81, 112, 255, 0.25);
+      pointer-events: none;
+      animation: dot-drift 12s ease-in-out infinite;
+    }
+    .float-dot:nth-child(2) { width: 4px; height: 4px; animation-delay: -3s; background: rgba(123, 146, 255, 0.2); }
+    .float-dot:nth-child(3) { animation-delay: -7s; }
+    .float-dot:nth-child(4) { width: 2px; height: 2px; animation-delay: -5s; background: rgba(203, 212, 255, 0.3); }
+    .float-dot:nth-child(5) { animation-delay: -9s; }
+    @keyframes dot-drift {
+      0%, 100% { transform: translate(0, 0); opacity: 0.3; }
+      25% { transform: translate(15px, -10px); opacity: 0.6; }
+      50% { transform: translate(-8px, 12px); opacity: 0.2; }
+      75% { transform: translate(10px, 8px); opacity: 0.5; }
+    }
+
+    /* ─── SECTION DIVIDER GLOW ─── */
+    section::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 50%;
+      max-width: 300px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(81, 112, 255, 0.08), transparent);
+      pointer-events: none;
+    }
+    section:last-of-type::after { display: none; }
+
+    /* ─── HOVER GUARD (touch-safe) ─── */
+    @media (hover: hover) and (pointer: fine) {
+      .about-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(81,112,255,0.25);
+      }
+      .solution-item:hover {
+        transform: translateX(4px);
+        border-color: rgba(81,112,255,0.2);
+      }
+      .problem-card:hover {
+        transform: translateY(-2px);
+      }
+      .method-step:hover {
+        transform: translateY(-2px);
+      }
+      .market-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(123,146,255,0.2);
+        background: #1E2030;
+      }
+      .market-card:hover::after { opacity: 1; }
+      .market-card:hover .market-card-badge {
+        background: rgba(81,112,255,0.16);
+        border-color: rgba(81,112,255,0.25);
+        box-shadow: 0 0 20px rgba(81,112,255,0.1);
+      }
+      .business-card:hover {
+        transform: translateY(-3px);
+        border-color: rgba(81,112,255,0.2);
+      }
+      .contact-channel:hover {
+        border-color: rgba(81,112,255,0.2);
+      }
+    }
+
+    /* ─── CURSOR FOLLOWER ─── */
+    .cursor-follower {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(81, 112, 255, 0.35);
+      box-shadow: 0 0 12px rgba(81, 112, 255, 0.25), 0 0 30px rgba(81, 112, 255, 0.1);
+      pointer-events: none;
+      z-index: 9999;
+      mix-blend-mode: screen;
+      will-change: transform;
+      transition: width 0.3s ease, height 0.3s ease, background 0.3s ease;
+      transform: translate(-50%, -50%);
+    }
+    .cursor-follower.is-link {
+      width: 28px;
+      height: 28px;
+      background: rgba(81, 112, 255, 0.15);
+    }
+    @media (hover: none) and (pointer: coarse) {
+      .cursor-follower { display: none; }
+    }
+
+    /* ─── SCROLL PROGRESS BAR ─── */
+    .scroll-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 0%;
+      height: 2px;
+      background: linear-gradient(90deg, #5170ff, #7B92FF);
+      z-index: 200;
+      transition: width 0.1s linear;
+      pointer-events: none;
+    }
+
+    /* ─── BUTTON RIPPLE ─── */
+    .btn {
+      overflow: hidden;
+    }
+    .btn-ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      transform: scale(0);
+      animation: ripple-out 0.6s ease-out forwards;
+      pointer-events: none;
+    }
+    @keyframes ripple-out {
+      to { transform: scale(4); opacity: 0; }
+    }
+
+    /* ─── GLASSMORPHISM CARDS ─── */
+    .about-card {
+      background: rgba(26, 28, 42, 0.65);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .solution-item {
+      background: rgba(7, 8, 11, 0.55);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    .contact-channel {
+      background: rgba(18, 19, 28, 0.6);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    /* ─── GRADIENT BORDER ANIMATION ─── */
+    .about-card::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, transparent 30%, rgba(81,112,255,0.15), transparent 70%);
+      z-index: -1;
+      opacity: 0;
+      transition: opacity 0.5s var(--ease);
+    }
+    .about-card:hover::before {
+      opacity: 1;
+    }
+
+    /* ─── REDUCED MOTION ─── */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+      .reveal { opacity: 1; transform: none; filter: none; }
+      .word-char { opacity: 1; transform: none; filter: none; }
+      .stagger-item { opacity: 1; transform: none; }
+      .form-body.is-submitted { opacity: 1; filter: none; }
+      .form-success { opacity: 1; transform: none; }
+      .form-success-icon { transform: scale(1); }
+      .form-success-text { opacity: 1; transform: none; }
+      .mod-cell { background: transparent !important; box-shadow: none !important; }
+      .cursor-follower { display: none; }
+      .scroll-progress { display: none; }
+      .btn:active { transform: none; }
+      .about-card:hover { transform: none; }
+      .solution-item:hover { transform: none; }
+      .problem-card:hover { transform: none; }
+      .method-step:hover { transform: none; }
+      .market-card:hover { transform: none; }
+      .business-card:hover { transform: none; }
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 1100px) {
+      .hero-grid { grid-template-columns: 1fr; gap: 2rem; }
+      .hero-visual { min-height: 300px; order: -1; }
+      .hero-visual-inner { max-width: 280px; }
+      .problems-grid { grid-template-columns: 1fr 1fr; }
+      .methodology-flow { grid-template-columns: repeat(3, 1fr); }
+      .market-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      .navbar { padding: 0 1rem; }
+      .nav-links {
+        position: fixed; top: 68px; left: 0; right: 0;
+        background: rgba(7, 8, 11, 0.98); backdrop-filter: blur(24px);
+        flex-direction: column; padding: 0.75rem 1rem; gap: 0.15rem;
+        border-bottom: 1px solid var(--border);
+        transform: translateY(-110%); opacity: 0; transition: var(--transition); pointer-events: none;
+      }
+      .nav-links.open { transform: translateY(0); opacity: 1; pointer-events: all; }
+      .nav-links a { width: 100%; padding: 0.6rem 0.9rem; }
+      .nav-toggle { display: flex; }
+      .hero { padding: 0 1rem; padding-top: 80px; min-height: auto; padding-bottom: 60px; }
+      .hero h1 .wordmark { letter-spacing: -1px; }
+      .hero-stats { flex-direction: column; gap: 1.5rem; }
+      .section-w { padding: 70px 1rem; }
+      .about-grid { grid-template-columns: 1fr; }
+      .about-cards { grid-template-columns: 1fr; }
+      .problems-intro { grid-template-columns: 1fr; }
+      .problems-grid { grid-template-columns: 1fr; }
+      .methodology-flow { grid-template-columns: 1fr; }
+      .solution-grid { grid-template-columns: 1fr; }
+      .market-grid { grid-template-columns: 1fr; }
+      .business-grid { grid-template-columns: 1fr; }
+      .contact-grid { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+      .banner { padding: 60px 1rem; }
+      .hero-actions { flex-direction: column; }
+      .btn { justify-content: center; }
+    }
+
+    @media (min-width: 769px) and (max-width: 900px) {
+      .methodology-flow { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 500px) {
+      .hero h1 { font-size: 2rem; }
+      .hero h1 .wordmark { font-size: 1em; }
+      .hero-visual { min-height: 220px; }
+      .hero-visual-inner { max-width: 200px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="mod-grid" id="modGrid">
+    <div class="mod-grid-inner" id="modGridInner"></div>
+  </div>
+  <div class="noise-overlay"></div>
+
+  <!-- ─── NAVBAR ─── -->
+  <nav class="navbar" id="navbar">
+<a href="#" class="nav-logo">
+            <img src="logo.png" alt="MODS IA" class="nav-logo-img">
+          </a>
+    <button class="nav-toggle" id="navToggle" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#about">Quiénes somos</a></li>
+      <li><a href="#problems">Problemas</a></li>
+      <li><a href="#solution">Solución</a></li>
+      <li><a href="#methodology">Metodología</a></li>
+      <li><a href="#contact" class="nav-cta">Contáctanos</a></li>
+    </ul>
+  </nav>
+
+  <!-- ─── HERO ─── -->
+  <section class="hero" id="hero">
+    <div class="glow-blob glow-blob-1"></div>
+    <div class="glow-blob glow-blob-2"></div>
+    <div class="glow-blob glow-blob-3"></div>
+    <div class="float-dot" style="top:15%;left:8%"></div>
+    <div class="float-dot" style="top:70%;right:12%"></div>
+    <div class="float-dot" style="top:30%;right:5%"></div>
+    <div class="float-dot" style="bottom:20%;left:15%"></div>
+    <div class="float-dot" style="top:55%;left:6%"></div>
+    <div class="container">
+      <div class="hero-grid">
+        <div class="hero-text">
+          <div class="hero-tag">
+            > Consultoría en automatización inteligente <span class="blink"></span>
+          </div>
+          <h1 id="heroHeadline">
+            <span class="word-char" style="transition-delay:0ms">Agentes</span> <span class="word-char" style="transition-delay:80ms">de</span> <span class="word-char" style="transition-delay:160ms">IA</span> <span class="word-char" style="transition-delay:240ms">que</span><br>
+            <span class="word-char" style="transition-delay:320ms">transforman</span> <span class="word-char" style="transition-delay:400ms">tu</span> <span class="word-char" style="transition-delay:480ms">negocio</span>
+            <span class="wordmark shimmer-text">MODS IA</span>
+          </h1>
+          <p>
+            Diseñamos sistemas inteligentes y agentes de IA para eliminar tareas manuales,
+            organizar tu información y potenciar el crecimiento de tu empresa.
+          </p>
+          <div class="hero-actions">
+            <a href="#contact" class="btn btn-primary">
+              Solicita diagnóstico gratuito
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </a>
+            <a href="#methodology" class="btn btn-secondary">Ver metodología</a>
+          </div>
+          <div class="hero-stats reveal" data-stagger="100">
+            <div class="hero-stat stagger-item"><h3>+200</h3><p>Procesos automatizados</p></div>
+            <div class="hero-stat stagger-item"><h3>+50</h3><p>Empresas transformadas</p></div>
+            <div class="hero-stat stagger-item"><h3>97%</h3><p>Casos de éxito</p></div>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <div class="hero-visual-inner">
+            <canvas id="globeCanvas"></canvas>
+            <div class="hero-visual-ring"></div>
+            <div class="hero-visual-ring"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── ABOUT ─── -->
+  <section id="about">
+    <div class="glow-blob glow-blob-2" style="top:auto;bottom:-10%;left:-10%;"></div>
+    <div class="section-w">
+      <span class="section-tag reveal">Quiénes somos</span>
+      <div class="about-grid">
+        <div class="reveal">
+          <div class="about-claim">
+            No somos una consultora tradicional.
+            Somos <em>arquitectos de sistemas inteligentes</em> que entienden tu negocio
+            antes de escribir una línea de código.
+          </div>
+          <div class="about-text">
+            <p>En <strong>MODS IA</strong> ayudamos a pequeñas y medianas empresas a modernizar su operación. Eliminamos tareas manuales, estructuramos procesos y conectamos tus herramientas con inteligencia artificial.</p>
+            <p>Trabajamos bajo un enfoque consultivo: primero entendemos tu realidad operativa, luego diseñamos la solución. No aplicamos recetas genéricas.</p>
+          </div>
+        </div>
+        <div class="about-cards reveal" data-stagger="80">
+          <div class="about-card stagger-item">
+            <div class="about-card-label">Enfoque</div>
+            <h4>Consultivo y a medida</h4>
+            <p>Analizamos tu operación antes de proponer cualquier cambio.</p>
+          </div>
+          <div class="about-card stagger-item">
+            <div class="about-card-label">Impacto</div>
+            <h4>Resultados medibles</h4>
+            <p>Cada solución se diseña para generar un retorno tangible.</p>
+          </div>
+          <div class="about-card stagger-item">
+            <div class="about-card-label">Tecnología</div>
+            <h4>IA aplicada a tu negocio</h4>
+            <p>Agentes inteligentes que se integran con tus herramientas actuales.</p>
+          </div>
+          <div class="about-card stagger-item">
+            <div class="about-card-label">Escalabilidad</div>
+            <h4>Diseñado para crecer</h4>
+            <p>Soluciones modulares que evolucionan junto con tu empresa.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── PROBLEMS ─── -->
+  <section id="problems">
+    <div class="section-w">
+      <span class="section-tag reveal">Diagnóstico</span>
+      <h2 class="section-title reveal">¿Reconoces estas señales en tu empresa?</h2>
+      <div class="problems-intro">
+        <p class="reveal">Muchas empresas pierden tiempo, dinero y talento en procesos que podrían resolverse con inteligencia artificial. Estas son las señales más comunes de que necesitas una transformación.</p>
+        <p class="reveal">Si tu equipo está atascado en tareas repetitivas, tu información está dispersa o tus herramientas no se comunican entre sí, tenemos una solución para ti.</p>
+      </div>
+      <div class="problems-grid reveal" data-stagger="60">
+        <div class="problem-card stagger-item">
+          <div class="problem-card-icon">[ 01 ]</div>
+          <h4>Procesos manuales repetitivos</h4>
+          <p>Horas perdidas en tareas que podría ejecutar un agente en segundos.</p>
+        </div>
+        <div class="problem-card stagger-item">
+          <div class="problem-card-icon">[ 02 ]</div>
+          <h4>Datos desorganizados</h4>
+          <p>Información crítica dispersa en correos, archivos y herramientas sin conexión.</p>
+        </div>
+        <div class="problem-card stagger-item">
+          <div class="problem-card-icon">[ 03 ]</div>
+          <h4>Cuellos de botella operativos</h4>
+          <p>Tu mejor talento estancado en tareas administrativas de bajo valor.</p>
+        </div>
+        <div class="problem-card stagger-item">
+          <div class="problem-card-icon">[ 04 ]</div>
+          <h4>Herramientas aisladas</h4>
+          <p>Sistemas que no se comunican, generando silos y duplicación de esfuerzo.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── SOLUTION ─── -->
+  <section id="solution">
+    <div class="glow-blob glow-blob-1" style="top:auto;bottom:-5%;right:-5%;"></div>
+    <div class="section-w">
+      <span class="section-tag reveal">Solución</span>
+      <div class="solution-grid">
+        <div class="reveal">
+          <h2 class="section-title">Construimos los módulos <br>que tu operación necesita</h2>
+          <p class="section-desc" style="margin-bottom: 1.5rem;">Cada solución es un sistema de componentes inteligentes diseñados para resolver problemas específicos de tu empresa.</p>
+          <div data-stagger="60">
+            <div class="solution-item stagger-item">
+              <span class="solution-item-marker">01</span>
+              <div>
+                <h4>Automatización de procesos</h4>
+                <p>Identificamos cuellos de botella y rediseñamos flujos completos.</p>
+              </div>
+            </div>
+            <div class="solution-item stagger-item">
+              <span class="solution-item-marker">02</span>
+              <div>
+                <h4>Agentes de IA personalizados</h4>
+                <p>Creamos asistentes inteligentes entrenados con tu información.</p>
+              </div>
+            </div>
+            <div class="solution-item stagger-item">
+              <span class="solution-item-marker">03</span>
+              <div>
+                <h4>Centralización de datos</h4>
+                <p>Unificamos tu información en un ecosistema ordenado y accesible.</p>
+              </div>
+            </div>
+            <div class="solution-item stagger-item">
+              <span class="solution-item-marker">04</span>
+              <div>
+                <h4>Paneles de decisión</h4>
+              <p>Información clara y en tiempo real para tomar mejores decisiones.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="reveal">
+          <div class="solution-terminal">
+            <div class="terminal-header">
+              <span class="terminal-dot"></span><span class="terminal-dot"></span><span class="terminal-dot"></span>
+            </div>
+            <div class="terminal-body">
+              <div class="terminal-line"><span class="prompt">$</span> <span class="cmd">mods --diagnóstico</span></div>
+              <div class="terminal-line"><span class="output">> Analizando procesos actuales...</span></div>
+              <div class="terminal-line"><span class="output">> Detectando oportunidades de mejora</span></div>
+              <div class="terminal-line"><span class="output output-ok">✓ 12 procesos manuales identificados</span></div>
+              <div class="terminal-line" style="margin-top: 0.5rem;"><span class="prompt">$</span> <span class="cmd">mods --diseñar solucion</span></div>
+              <div class="terminal-line"><span class="output">> Generando arquitectura modular...</span></div>
+              <div class="terminal-line"><span class="output output-ok">✓ Solución personalizada creada</span></div>
+              <div class="terminal-line" style="margin-top: 0.5rem;"><span class="prompt">$</span> <span class="cmd">mods --implementar</span></div>
+              <div class="terminal-line"><span class="output">> Desplegando agentes inteligentes...</span></div>
+              <div class="terminal-line"><span class="output output-ok">✓ Sistema operativo</span></div>
+              <div class="terminal-line"><span class="output output-ok">✓ Optimización continua activa</span></div>
+              <div class="terminal-line" style="margin-top: 0.5rem;"><span class="prompt">$</span> <span class="cmd cursor-blink">_</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── BANNER ─── -->
+  <section class="banner">
+    <span class="section-tag reveal">Propuesta de valor</span>
+    <h2 class="reveal">Ahorra tiempo, reduce errores y mejora tu eficiencia operativa con soluciones de <em>automatización inteligente</em></h2>
+    <p class="reveal">Diseñado a la medida de tu empresa. Escalable. Orientado a resultados.</p>
+    <a href="#contact" class="btn btn-primary reveal">
+      Empieza hoy
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </a>
+  </section>
+
+  <!-- ─── METHODOLOGY ─── -->
+  <section id="methodology">
+    <div class="section-w">
+      <span class="section-tag reveal">Metodología</span>
+      <h2 class="section-title reveal">De la diagnosis a la optimización</h2>
+      <p class="section-desc reveal" style="margin-bottom: 0;">Un proceso estructurado en 5 fases, desde el primer análisis hasta la mejora continua.</p>
+      <div class="methodology-flow reveal" data-stagger="50">
+        <div class="method-step stagger-item">
+          <div class="method-step-num">1</div>
+          <h4>Diagnóstico inicial</h4>
+          <p>Evaluamos tus procesos actuales y mapeamos tu operación.</p>
+        </div>
+        <div class="method-step stagger-item">
+          <div class="method-step-num">2</div>
+          <h4>Análisis estratégico</h4>
+          <p>Identificamos las oportunidades de mayor impacto.</p>
+        </div>
+        <div class="method-step stagger-item">
+          <div class="method-step-num">3</div>
+          <h4>Diseño de solución</h4>
+          <p>Creamos una propuesta modular adaptada a tu negocio.</p>
+        </div>
+        <div class="method-step stagger-item">
+          <div class="method-step-num">4</div>
+          <h4>Implementación</h4>
+          <p>Desarrollamos e integramos los sistemas automatizados.</p>
+        </div>
+        <div class="method-step stagger-item">
+          <div class="method-step-num">5</div>
+          <h4>Mejora continua</h4>
+          <p>Monitoreamos, optimizamos y evolucionamos el sistema.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── MARKET ─── -->
+  <section id="market">
+    <div class="glow-blob glow-blob-1" style="top:10%;right:-5%;"></div>
+    <div class="glow-blob glow-blob-2" style="bottom:5%;left:-8%;"></div>
+    <div class="section-w">
+      <span class="section-tag reveal">Mercado objetivo</span>
+      <h2 class="section-title reveal">¿Para quién es MODS IA?</h2>
+      <div class="market-grid reveal" data-stagger="80">
+        <div class="market-card stagger-item">
+          <div class="market-card-badge">01</div>
+          <h4>Pequeñas y medianas empresas</h4>
+          <p>Buscan optimizar sus operaciones sin grandes inversiones en infraestructura tecnológica.</p>
+        </div>
+        <div class="market-card stagger-item">
+          <div class="market-card-badge">02</div>
+          <h4>Negocios en etapa de crecimiento</h4>
+          <p>Necesitan sistemas que escalen al mismo ritmo que su expansión comercial.</p>
+        </div>
+        <div class="market-card stagger-item">
+          <div class="market-card-badge">03</div>
+          <h4>Alta carga operativa manual</h4>
+          <p>Requieren automatización para eliminar tareas repetitivas que consumen tiempo valioso.</p>
+        </div>
+        <div class="market-card stagger-item">
+          <div class="market-card-badge">04</div>
+          <h4>Buscando modernizar su gestión</h4>
+          <p>Desean integrar sus herramientas y datos en un ecosistema digital cohesivo.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── BUSINESS MODEL ─── -->
+  <section id="business">
+    <div class="section-w">
+      <span class="section-tag reveal">Modelo de negocio</span>
+      <h2 class="section-title reveal">Flexible y escalable</h2>
+      <p class="section-desc reveal" style="margin-bottom: 0;">Nos adaptamos a tu presupuesto y necesidades. Sin compromisos rígidos.</p>
+      <div class="business-grid reveal" data-stagger="80">
+        <div class="business-card stagger-item">
+          <div class="business-card-label">Paso 1</div>
+          <h4>Implementación inicial</h4>
+          <p>Inversión única por el diseño, desarrollo y puesta en marcha de tu solución.</p>
+        </div>
+        <div class="business-card stagger-item">
+          <div class="business-card-label">Paso 2</div>
+          <h4>Soporte mensual</h4>
+          <p>Planes de mantenimiento, soporte técnico y optimización continua.</p>
+        </div>
+        <div class="business-card stagger-item">
+          <div class="business-card-label">Paso 3</div>
+          <h4>Escalabilidad</h4>
+          <p>Nuevos módulos y funcionalidades a medida que tu empresa crece.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── CONTACT ─── -->
+  <section id="contact">
+    <div class="section-w">
+      <span class="section-tag reveal">Contacto</span>
+      <h2 class="section-title reveal">Hablemos de tu proyecto</h2>
+      <p class="section-desc reveal">Cuéntanos sobre tu empresa y te presentaremos una solución diseñada a tu medida.</p>
+      <div class="contact-grid">
+        <div class="reveal" data-stagger="120">
+          <p class="contact-info-text stagger-item">No ofrecemos tecnología por tecnología. Creamos soluciones orientadas a resultados que permiten a las empresas operar de manera más organizada, eficiente y preparada para crecer.</p>
+          <div class="contact-channel stagger-item">
+            <span class="contact-channel-icon">✉</span>
+            <div><h5>Email</h5><p>Mods.agency.ia@gmail.com</p></div>
+          </div>
+          <div class="contact-channel stagger-item">
+            <span class="contact-channel-icon">💬</span>
+            <div><h5>WhatsApp</h5><p>(+58) 0412-7507084</p></div>
+          </div>
+        </div>
+        <form class="contact-form reveal" id="contactForm">
+          <div class="form-body">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="name">Nombre</label>
+                <input type="text" id="name" placeholder="Tu nombre" required>
+              </div>
+              <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" placeholder="tu@email.com" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="company">Empresa</label>
+              <input type="text" id="company" placeholder="Nombre de tu empresa">
+            </div>
+            <div class="form-group">
+              <label for="service">Interés</label>
+              <select id="service">
+                <option value="">Selecciona</option>
+                <option value="consultoria">Consultoría en automatización</option>
+                <option value="implementacion">Implementación de soluciones</option>
+                <option value="agentes">Agentes de IA personalizados</option>
+                <option value="otros">Otros</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="message">Cuéntanos más</label>
+              <textarea id="message" placeholder="Describe brevemente tu situación o lo que necesitas..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" style="align-self: flex-start;">
+              Enviar mensaje
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </button>
+          </div>
+          <div class="form-success" aria-hidden="true">
+            <div class="form-success-icon">✓</div>
+            <div class="form-success-text">
+              <h4>Mensaje enviado</h4>
+              <p>Gracias por contactarnos. Te responderemos pronto.</p>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FOOTER ─── -->
+  <footer>
+<a href="#" class="nav-logo" style="justify-content: center;">
+            <img src="logo.png" alt="MODS IA" class="nav-logo-img">
+          </a>
+    <p>MODS IA — Agencia de Consultoría en Automatización Inteligente</p>
+    <ul class="footer-meta">
+      <li><a href="#about">Quiénes somos</a></li>
+      <li><a href="#solution">Solución</a></li>
+      <li><a href="#methodology">Metodología</a></li>
+      <li><a href="#contact">Contacto</a></li>
+    </ul>
+    <p class="footer-copy">&copy; 2026 MODS IA. Todos los derechos reservados.</p>
+  </footer>
+
+  <script>
+    // ─── MODULAR GRID (ambient wave + cursor influence) ───
+    (function() {
+      var grid = document.getElementById('modGridInner');
+      if (!grid) return;
+
+      var COLS = 24, ROWS = 30;
+      var TOTAL = COLS * ROWS;
+      var cells = [];
+      var cursorX = -1, cursorY = -1;
+      var trail = {};
+      var cellW;
+
+      for (var i = 0; i < TOTAL; i++) {
+        var el = document.createElement('div');
+        el.className = 'mod-cell';
+        grid.appendChild(el);
+        cells.push(el);
+      }
+
+      function idx(col, row) { return row * COLS + col; }
+      function inBounds(col, row) { return col >= 0 && col < COLS && row >= 0 && row < ROWS; }
+
+      cellW = window.innerWidth / COLS;
+      window.addEventListener('resize', function() { cellW = window.innerWidth / COLS; });
+
+      document.addEventListener('mousemove', function(e) {
+        var col = Math.floor(e.clientX / cellW);
+        var row = Math.floor(e.clientY / cellW);
+        col = Math.max(0, Math.min(COLS - 1, col));
+        row = Math.max(0, Math.min(ROWS - 1, row));
+        if (col !== cursorX || row !== cursorY) {
+          var prevIdx = idx(cursorX, cursorY);
+          if (cursorX >= 0 && !trail[prevIdx]) trail[prevIdx] = 0.5;
+          cursorX = col; cursorY = row;
+        }
+      });
+
+      document.addEventListener('mouseleave', function() {
+        cursorX = -1; cursorY = -1;
+      });
+
+      var t = 0;
+      function animate() {
+        t += 0.018;
+
+        // Decay trail
+        for (var key in trail) {
+          trail[key] -= 0.025;
+          if (trail[key] <= 0) delete trail[key];
+        }
+
+        var cx = cursorX, cy = cursorY;
+        var hasCursor = cx >= 0 && cy >= 0;
+
+        for (var r = 0; r < ROWS; r++) {
+          for (var c = 0; c < COLS; c++) {
+            var i = idx(c, r);
+            var el = cells[i];
+
+            // Ambient wave
+            var wave1 = Math.sin(c * 0.18 + t * 1.6) * 0.5 + 0.5;
+            var wave2 = Math.sin(r * 0.15 + t * 1.2 + 1.2) * 0.5 + 0.5;
+            var wave3 = Math.sin((c + r) * 0.12 - t * 0.9) * 0.5 + 0.5;
+            var ambient = (wave1 * 0.3 + wave2 * 0.3 + wave3 * 0.4) * 0.025 + 0.004;
+
+            // Cursor glow (bright center + falloff)
+            if (hasCursor) {
+              var dc = c - cx, dr = r - cy;
+              var dist = Math.sqrt(dc * dc + dr * dr);
+              if (dist < 5) {
+                var glow = 1 - dist / 5;
+                ambient += glow * glow * 0.3;
+              }
+            }
+
+            // Trail afterglow
+            var trailKey = String(i);
+            if (trail[trailKey]) {
+              ambient += trail[trailKey] * 0.12;
+            }
+
+            ambient = Math.min(ambient, 0.55);
+            el.style.background = 'rgba(81,112,255,' + ambient.toFixed(4) + ')';
+          }
+        }
+
+        requestAnimationFrame(animate);
+      }
+
+      animate();
+    })();
+
+    // ─── 3D CYBER GLOBE ───
+    (function() {
+      var canvas = document.getElementById('globeCanvas');
+      if (!canvas) return;
+      var ctx = canvas.getContext('2d');
+      var W, H, R;
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+      function resize() {
+        var rect = canvas.parentElement.getBoundingClientRect();
+        W = rect.width;
+        H = rect.height;
+        canvas.width = W * dpr;
+        canvas.height = H * dpr;
+        canvas.style.width = W + 'px';
+        canvas.style.height = H + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        R = Math.min(W, H) * 0.48;
+      }
+
+      var LATS = 20, LONS = 24;
+      var verts = [];
+      for (var i = 0; i <= LATS; i++) {
+        var theta = (i / LATS) * Math.PI;
+        var ring = [];
+        for (var j = 0; j < LONS; j++) {
+          var phi = (j / LONS) * 2 * Math.PI;
+          ring.push({
+            x: Math.sin(theta) * Math.cos(phi),
+            y: Math.cos(theta),
+            z: Math.sin(theta) * Math.sin(phi)
+          });
+        }
+        verts.push(ring);
+      }
+
+      var PCOUNT = 100;
+      var particles = [];
+      for (var i = 0; i < PCOUNT; i++) {
+        var theta = Math.random() * 2 * Math.PI;
+        var phi = Math.acos(2 * Math.random() - 1);
+        var r = 1.2 + Math.random() * 1.0;
+        particles.push({
+          x: r * Math.sin(phi) * Math.cos(theta),
+          y: r * Math.cos(phi),
+          z: r * Math.sin(phi) * Math.sin(theta),
+          speed: 0.12 + Math.random() * 0.4,
+          phase: Math.random() * 2 * Math.PI,
+          size: 0.8 + Math.random() * 1.8
+        });
+      }
+
+      var orbDefs = [
+        { tilt: 0.4, radius: 1.32, speed: 0.4, phase: 0, color: 'rgba(81,112,255,0.15)' },
+        { tilt: -0.55, radius: 1.52, speed: -0.32, phase: 1.8, color: 'rgba(123,146,255,0.1)' },
+        { tilt: 0.15, radius: 1.16, speed: 0.45, phase: 3.2, color: 'rgba(203,212,255,0.07)' }
+      ];
+
+      function rotate(v, rx, ry) {
+        var x = v.x, y = v.y, z = v.z;
+        var cy = Math.cos(ry), sy = Math.sin(ry);
+        var x1 = x * cy + z * sy;
+        var z1 = -x * sy + z * cy;
+        var cx = Math.cos(rx), sx = Math.sin(rx);
+        return { x: x1, y: y * cx - z1 * sx, z: y * sx + z1 * cx };
+      }
+
+      var angle = 0;
+      var mx = 0.5, my = 0.5;
+      var rx = 0, ry = 0;
+      var trx = 0, try_ = 0;
+
+      canvas.addEventListener('mousemove', function(e) {
+        var rect = canvas.getBoundingClientRect();
+        mx = (e.clientX - rect.left) / W;
+        my = (e.clientY - rect.top) / H;
+      });
+      canvas.addEventListener('mouseleave', function() { mx = 0.5; my = 0.5; });
+
+      canvas.addEventListener('touchmove', function(e) {
+        e.preventDefault();
+        var rect = canvas.getBoundingClientRect();
+        var t = e.touches[0];
+        mx = (t.clientX - rect.left) / W;
+        my = (t.clientY - rect.top) / H;
+      }, { passive: false });
+
+      var pc = [];
+
+      function animate() {
+        angle += 0.006;
+
+        trx = (my - 0.5) * 0.7 + Math.sin(angle * 0.12) * 0.06;
+        try_ = angle + (mx - 0.5) * 1.0;
+        rx += (trx - rx) * 0.06;
+        ry += (try_ - ry) * 0.06;
+
+        ctx.clearRect(0, 0, W, H);
+
+        // Background glow halo (pulsing)
+        var pulse = 0.85 + 0.15 * Math.sin(angle * 0.5);
+        var cg = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, R * 1.4);
+        cg.addColorStop(0, 'rgba(81,112,255,' + (0.06 * pulse).toFixed(3) + ')');
+        cg.addColorStop(0.4, 'rgba(81,112,255,' + (0.03 * pulse).toFixed(3) + ')');
+        cg.addColorStop(1, 'rgba(81,112,255,0)');
+        ctx.fillStyle = cg;
+        ctx.fillRect(0, 0, W, H);
+
+        // Outer ring glow
+        ctx.beginPath();
+        ctx.arc(W / 2, H / 2, R * 0.98, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(81,112,255,' + (0.04 * pulse).toFixed(3) + ')';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        pc = [];
+        for (var i = 0; i <= LATS; i++) {
+          var row = [];
+          for (var j = 0; j < LONS; j++) {
+            var rv = rotate(verts[i][j], rx, ry);
+            var persp = 600 / (600 + rv.z * R);
+            row.push({
+              sx: W / 2 + rv.x * R * persp,
+              sy: H / 2 + rv.y * R * persp,
+              depth: rv.z,
+              persp: persp
+            });
+          }
+          pc.push(row);
+        }
+
+        function gp(i, j) { return pc[i][j % LONS]; }
+
+        // Back wireframe
+        for (var i = 0; i <= LATS; i++) {
+          ctx.beginPath();
+          var started = false;
+          for (var j = 0; j <= LONS; j++) {
+            var p = gp(i, j);
+            if (p.depth < 0) {
+              if (!started) { ctx.moveTo(p.sx, p.sy); started = true; }
+              else ctx.lineTo(p.sx, p.sy);
+            } else started = false;
+          }
+          ctx.strokeStyle = 'rgba(81,112,255,0.06)';
+          ctx.lineWidth = 0.8;
+          ctx.stroke();
+        }
+        for (var j = 0; j < LONS; j++) {
+          ctx.beginPath();
+          var started = false;
+          for (var i = 0; i <= LATS; i++) {
+            var p = gp(i, j);
+            if (p.depth < 0) {
+              if (!started) { ctx.moveTo(p.sx, p.sy); started = true; }
+              else ctx.lineTo(p.sx, p.sy);
+            } else started = false;
+          }
+          ctx.strokeStyle = 'rgba(81,112,255,0.06)';
+          ctx.lineWidth = 0.8;
+          ctx.stroke();
+        }
+
+        // Front wireframe
+        for (var i = 0; i <= LATS; i++) {
+          ctx.beginPath();
+          var started = false;
+          for (var j = 0; j <= LONS; j++) {
+            var p = gp(i, j);
+            if (p.depth >= 0) {
+              if (!started) { ctx.moveTo(p.sx, p.sy); started = true; }
+              else ctx.lineTo(p.sx, p.sy);
+            } else started = false;
+          }
+          var a = 0.18 + 0.22 * (1 - Math.abs(i / LATS - 0.5) * 0.6);
+          ctx.strokeStyle = 'rgba(81,112,255,' + a.toFixed(3) + ')';
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+        }
+        for (var j = 0; j < LONS; j++) {
+          ctx.beginPath();
+          var started = false;
+          for (var i = 0; i <= LATS; i++) {
+            var p = gp(i, j);
+            if (p.depth >= 0) {
+              if (!started) { ctx.moveTo(p.sx, p.sy); started = true; }
+              else ctx.lineTo(p.sx, p.sy);
+            } else started = false;
+          }
+          ctx.strokeStyle = 'rgba(81,112,255,0.12)';
+          ctx.lineWidth = 1.2;
+          ctx.stroke();
+        }
+
+        // Glow nodes (more, brighter)
+        for (var i = 1; i < LATS - 1; i += 2) {
+          for (var j = 0; j < LONS; j += 2) {
+            var p = gp(i, j);
+            if (p.depth > 0) {
+              var a = Math.min(0.8, p.depth * 0.9);
+              ctx.beginPath();
+              ctx.arc(p.sx, p.sy, 2.5, 0, Math.PI * 2);
+              ctx.fillStyle = 'rgba(129,155,255,' + a.toFixed(2) + ')';
+              ctx.fill();
+              ctx.beginPath();
+              ctx.arc(p.sx, p.sy, 8, 0, Math.PI * 2);
+              ctx.fillStyle = 'rgba(81,112,255,' + (a * 0.2).toFixed(3) + ')';
+              ctx.fill();
+              ctx.beginPath();
+              ctx.arc(p.sx, p.sy, 14, 0, Math.PI * 2);
+              ctx.fillStyle = 'rgba(81,112,255,' + (a * 0.06).toFixed(3) + ')';
+              ctx.fill();
+            }
+          }
+        }
+
+        // Scan line
+        var scanY = ((angle * 0.3) % 2 - 1) * R;
+        if (scanY > -R && scanY < R) {
+          ctx.beginPath();
+          for (var s = 0; s < LONS; s++) {
+            var col = Math.floor(s);
+            var found = false;
+            for (var r = 0; r <= LATS; r++) {
+              var pp = gp(r, col);
+              if (Math.abs(pp.sy - (H / 2 + scanY)) < 5 && pp.depth > 0) {
+                if (!found) { ctx.moveTo(pp.sx - 3, pp.sy); found = true; }
+                ctx.lineTo(pp.sx + 3, pp.sy);
+              }
+            }
+          }
+          ctx.strokeStyle = 'rgba(129,155,255,0.25)';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          // Glow on scan line
+          ctx.beginPath();
+          for (var s = 0; s < LONS; s++) {
+            var col = Math.floor(s);
+            var found = false;
+            for (var r = 0; r <= LATS; r++) {
+              var pp = gp(r, col);
+              if (Math.abs(pp.sy - (H / 2 + scanY)) < 5 && pp.depth > 0) {
+                if (!found) { ctx.moveTo(pp.sx - 6, pp.sy); found = true; }
+                ctx.lineTo(pp.sx + 6, pp.sy);
+              }
+            }
+          }
+          ctx.strokeStyle = 'rgba(81,112,255,0.08)';
+          ctx.lineWidth = 6;
+          ctx.stroke();
+        }
+
+        // Particles (more, bigger)
+        for (var i = 0; i < PCOUNT; i++) {
+          var pt = particles[i];
+          var rv = rotate(pt, rx + Math.sin(angle * pt.speed + pt.phase) * 0.03, ry + Math.cos(angle * pt.speed + pt.phase) * 0.03);
+          if (rv.z > 0) {
+            var persp = 600 / (600 + rv.z * R);
+            var sx = W / 2 + rv.x * R * persp;
+            var sy = H / 2 + rv.y * R * persp;
+            var a = Math.min(0.5, rv.z * 0.4);
+            ctx.beginPath();
+            ctx.arc(sx, sy, pt.size * persp, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(123,146,255,' + a.toFixed(2) + ')';
+            ctx.fill();
+            if (pt.size > 1.2) {
+              ctx.beginPath();
+              ctx.arc(sx, sy, pt.size * 3 * persp, 0, Math.PI * 2);
+              ctx.fillStyle = 'rgba(81,112,255,' + (a * 0.08).toFixed(3) + ')';
+              ctx.fill();
+            }
+          }
+        }
+
+        // Orbital rings
+        var segs = 60;
+        for (var o = 0; o < orbDefs.length; o++) {
+          var def = orbDefs[o];
+          var oa = angle * def.speed + def.phase;
+          ctx.beginPath();
+          var started = false;
+          for (var s = 0; s <= segs; s++) {
+            var a = (s / segs) * 2 * Math.PI;
+            var ex = def.radius * Math.cos(a);
+            var ey = def.radius * Math.sin(a) * 0.25;
+            var ez = def.radius * Math.sin(a) * 0.75;
+            var ct = Math.cos(def.tilt), st = Math.sin(def.tilt);
+            var rv = rotate({ x: ex, y: ey * ct - ez * st, z: ey * st + ez * ct }, rx, ry);
+            if (rv.z > -0.05) {
+              var persp = 600 / (600 + rv.z * R);
+              var sx = W / 2 + rv.x * R * persp;
+              var sy = H / 2 + rv.y * R * persp;
+              if (!started) { ctx.moveTo(sx, sy); started = true; }
+              else ctx.lineTo(sx, sy);
+            } else started = false;
+          }
+          ctx.strokeStyle = def.color;
+          ctx.lineWidth = 1.2;
+          ctx.stroke();
+
+          // Dot on ring (bigger glow)
+          var da = oa;
+          var dx = def.radius * Math.cos(da);
+          var dy = def.radius * Math.sin(da) * 0.25;
+          var dz = def.radius * Math.sin(da) * 0.75;
+          var ct = Math.cos(def.tilt), st = Math.sin(def.tilt);
+          var rd = rotate({ x: dx, y: dy * ct - dz * st, z: dy * st + dz * ct }, rx, ry);
+          if (rd.z > 0) {
+            var persp = 600 / (600 + rd.z * R);
+            var sx = W / 2 + rd.x * R * persp;
+            var sy = H / 2 + rd.y * R * persp;
+            var da2 = Math.min(0.8, rd.z * 0.6);
+            ctx.beginPath();
+            ctx.arc(sx, sy, 3.5, 0, 2 * Math.PI);
+            ctx.fillStyle = 'rgba(129,155,255,' + da2.toFixed(2) + ')';
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(sx, sy, 10, 0, 2 * Math.PI);
+            ctx.fillStyle = 'rgba(81,112,255,' + (da2 * 0.2).toFixed(3) + ')';
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(sx, sy, 18, 0, 2 * Math.PI);
+            ctx.fillStyle = 'rgba(81,112,255,' + (da2 * 0.06).toFixed(3) + ')';
+            ctx.fill();
+          }
+        }
+
+        requestAnimationFrame(animate);
+      }
+
+      window.addEventListener('resize', resize);
+      resize();
+      animate();
+    })();
+
+    // ─── NAVBAR ───
+    var navbar = document.getElementById('navbar');
+    var navToggle = document.getElementById('navToggle');
+    var navLinks = document.getElementById('navLinks');
+
+    window.addEventListener('scroll', function() {
+      navbar.classList.toggle('scrolled', window.scrollY > 40);
+    });
+
+    navToggle.addEventListener('click', function() {
+      navLinks.classList.toggle('open');
+    });
+
+    document.querySelectorAll('.nav-links a').forEach(function(link) {
+      link.addEventListener('click', function() { navLinks.classList.remove('open'); });
+    });
+
+    // ─── SCROLL REVEAL (with stagger support) ───
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          // Stagger .stagger-item children or nested stagger containers
+          staggerItems(entry.target);
+        }
+      });
+    }, { threshold: 0.08 });
+
+    function staggerItems(root) {
+      // Direct stagger on this element
+      if (root.dataset.stagger) {
+        var delay = parseInt(root.dataset.stagger) || 80;
+        var children = root.children;
+        var idx = 0;
+        for (var i = 0; i < children.length; i++) {
+          if (children[i].classList.contains('stagger-item')) {
+            (function(index, el) {
+              setTimeout(function() { el.classList.add('visible'); }, idx * delay);
+            })(idx, children[i]);
+            idx++;
+          }
+        }
+      }
+      // Also stagger children that are stagger containers
+      for (var i = 0; i < root.children.length; i++) {
+        if (root.children[i].dataset.stagger) {
+          staggerItems(root.children[i]);
+        }
+      }
+    }
+
+    document.querySelectorAll('.reveal').forEach(function(el) { observer.observe(el); });
+
+    // ─── HERO WORD STAGGER ───
+    (function() {
+      var chars = document.querySelectorAll('#heroHeadline .word-char');
+      if (!chars.length) return;
+      var delay = 0;
+      chars.forEach(function(el) {
+        var d = parseInt(el.style.transitionDelay) || delay;
+        setTimeout(function() { el.classList.add('visible'); }, d + 300);
+        delay = d + 80;
+      });
+    })();
+
+    // ─── ACTIVE NAV ───
+    var sections = document.querySelectorAll('section[id]');
+    window.addEventListener('scroll', function() {
+      var current = '';
+      sections.forEach(function(s) {
+        if (window.scrollY >= s.offsetTop - 120) current = s.getAttribute('id');
+      });
+      document.querySelectorAll('.nav-links a:not(.nav-cta)').forEach(function(a) {
+        a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+      });
+    });
+
+    // ─── FORM (with success celebration) ───
+    document.getElementById('contactForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var form = this;
+      var body = form.querySelector('.form-body');
+      var success = form.querySelector('.form-success');
+
+      body.classList.add('is-submitted');
+      setTimeout(function() {
+        success.classList.add('visible');
+      }, 200);
+
+      setTimeout(function() {
+        body.classList.remove('is-submitted');
+        success.classList.remove('visible');
+        form.reset();
+      }, 5000);
+    });
+
+    // ─── CURSOR FOLLOWER ───
+    (function() {
+      var el = document.createElement('div');
+      el.className = 'cursor-follower';
+      document.body.appendChild(el);
+      var tx = -100, ty = -100;
+      var cx = -100, cy = -100;
+      document.addEventListener('mousemove', function(e) {
+        tx = e.clientX; ty = e.clientY;
+        el.style.display = 'block';
+      });
+      document.addEventListener('mouseleave', function() { el.style.display = 'none'; });
+      // Expand on links/buttons
+      document.querySelectorAll('a, button, .btn, input, textarea').forEach(function(n) {
+        n.addEventListener('mouseenter', function() { el.classList.add('is-link'); });
+        n.addEventListener('mouseleave', function() { el.classList.remove('is-link'); });
+      });
+      function follow() {
+        cx += (tx - cx) * 0.12;
+        cy += (ty - cy) * 0.12;
+        el.style.transform = 'translate(' + cx + 'px, ' + cy + 'px) translate(-50%, -50%)';
+        requestAnimationFrame(follow);
+      }
+      // Wait for init
+      setTimeout(follow, 50);
+    })();
+
+    // ─── SCROLL PROGRESS BAR ───
+    (function() {
+      var bar = document.createElement('div');
+      bar.className = 'scroll-progress';
+      document.body.appendChild(bar);
+      window.addEventListener('scroll', function() {
+        var scrollTop = window.scrollY;
+        var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        var pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        bar.style.width = pct + '%';
+      });
+    })();
+
+    // ─── BUTTON RIPPLE ───
+    document.querySelectorAll('.btn').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        var rect = btn.getBoundingClientRect();
+        var ripple = document.createElement('span');
+        ripple.className = 'btn-ripple';
+        var size = Math.max(rect.width, rect.height);
+        ripple.style.width = ripple.style.height = size + 'px';
+        ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+        ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+        btn.appendChild(ripple);
+        ripple.addEventListener('animationend', function() { ripple.remove(); });
+      });
+    });
+
+    // ─── TERMINAL LINE REVEAL ───
+    (function() {
+      var term = document.querySelector('.terminal-body');
+      if (!term) return;
+      var lines = Array.from(term.querySelectorAll('.terminal-line'));
+      if (!lines.length) return;
+      lines.forEach(function(l) { l.style.opacity = '0'; l.style.transform = 'translateY(6px)'; l.style.transition = 'opacity 0.35s ease, transform 0.35s ease'; });
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (!entry.isIntersecting) return;
+          observer.unobserve(entry.target);
+          lines.forEach(function(l, i) {
+            setTimeout(function() {
+              l.style.opacity = '1';
+              l.style.transform = 'translateY(0)';
+            }, 300 + i * 200);
+          });
+        });
+      }, { threshold: 0.25 });
+      observer.observe(term);
+    })();
+
+    // ─── STAT COUNTERS ───
+    (function() {
+      var stats = document.querySelectorAll('.hero-stat h3');
+      if (!stats.length) return;
+      var targets = [];
+      stats.forEach(function(s, i) {
+        var text = s.textContent.trim();
+        var prefix = text.charAt(0);
+        var suffix = text.slice(-1);
+        var numStr = text;
+        if (prefix === '+' || prefix === '−') numStr = text.slice(1);
+        if (numStr.slice(-1) === '%' || numStr.slice(-1) === '+' || numStr.slice(-1) === 'K') numStr = numStr.slice(0, -1);
+        var num = parseFloat(numStr);
+        if (isNaN(num)) return;
+        var finalDisplay = text;
+        targets.push({ el: s, target: num, prefix: prefix === '+' || prefix === '−' ? prefix : '', suffix: suffix === '%' || suffix === '+' || suffix === 'K' ? suffix : '', final: finalDisplay });
+        s.dataset.counted = 'false';
+      });
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (!entry.isIntersecting) return;
+          var t = targets[Array.from(stats).indexOf(entry.target)];
+          if (!t || t.el.dataset.counted === 'true') return;
+          t.el.dataset.counted = 'true';
+          observer.unobserve(t.el);
+          var start = 0;
+          var duration = 1200 + Math.random() * 400;
+          var startTime = performance.now();
+          var prefix = t.final.match(/^[+−]/) ? t.final[0] : '';
+          var suffix = t.final.match(/[%+K]$/) ? t.final.slice(-1) : '';
+          function count(now) {
+            var p = Math.min((now - startTime) / duration, 1);
+            var eased = 1 - Math.pow(1 - p, 3);
+            var val = Math.round(eased * t.target);
+            var display = val;
+            if (t.target % 1 !== 0) display = (eased * t.target).toFixed(1);
+            t.el.textContent = prefix + display + suffix;
+            if (p < 1) requestAnimationFrame(count);
+            else t.el.textContent = t.final;
+          }
+          requestAnimationFrame(count);
+        });
+      }, { threshold: 0.5 });
+      stats.forEach(function(s) { observer.observe(s); });
+    })();
+  </script>
+</body>
+</html>
