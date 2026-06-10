@@ -1922,7 +1922,9 @@
         t += 0.018;
 
         // Decay trail
-        for (var key in trail) {
+        var trailKeys = Object.keys(trail);
+        for (var ti = 0; ti < trailKeys.length; ti++) {
+          var key = trailKeys[ti];
           trail[key] -= 0.025;
           if (trail[key] <= 0) delete trail[key];
         }
@@ -2326,8 +2328,8 @@
       entries.forEach(function(entry) {
         if (entry.isIntersecting) {
           entry.target.classList.add('visible');
-          // Stagger .stagger-item children or nested stagger containers
           staggerItems(entry.target);
+          observer.unobserve(entry.target);
         }
       });
     }, { threshold: 0.08 });
@@ -2469,23 +2471,25 @@
       document.body.appendChild(el);
       var tx = -100, ty = -100;
       var cx = -100, cy = -100;
+      var hidden = false;
+      document.addEventListener('visibilitychange', function() { hidden = document.hidden; });
       document.addEventListener('mousemove', function(e) {
         tx = e.clientX; ty = e.clientY;
         el.style.display = 'block';
       });
       document.addEventListener('mouseleave', function() { el.style.display = 'none'; });
-      // Expand on links/buttons
       document.querySelectorAll('a, button, .btn, input, textarea').forEach(function(n) {
         n.addEventListener('mouseenter', function() { el.classList.add('is-link'); });
         n.addEventListener('mouseleave', function() { el.classList.remove('is-link'); });
       });
       function follow() {
-        cx += (tx - cx) * 0.12;
-        cy += (ty - cy) * 0.12;
-        el.style.transform = 'translate(' + cx + 'px, ' + cy + 'px) translate(-50%, -50%)';
+        if (!hidden) {
+          cx += (tx - cx) * 0.12;
+          cy += (ty - cy) * 0.12;
+          el.style.transform = 'translate(' + cx + 'px, ' + cy + 'px) translate(-50%, -50%)';
+        }
         requestAnimationFrame(follow);
       }
-      // Wait for init
       setTimeout(follow, 50);
     })();
 
@@ -2528,6 +2532,7 @@
         entries.forEach(function(entry) {
           if (!entry.isIntersecting) return;
           observer.unobserve(entry.target);
+          observer.disconnect();
           lines.forEach(function(l, i) {
             setTimeout(function() {
               l.style.opacity = '1';
@@ -2564,6 +2569,10 @@
           if (!t || t.el.dataset.counted === 'true') return;
           t.el.dataset.counted = 'true';
           observer.unobserve(t.el);
+          // Disconnect when all stats are counted
+          var allDone = true;
+          targets.forEach(function(tt) { if (tt.el.dataset.counted !== 'true') allDone = false; });
+          if (allDone) observer.disconnect();
           var start = 0;
           var duration = 1200 + Math.random() * 400;
           var startTime = performance.now();
