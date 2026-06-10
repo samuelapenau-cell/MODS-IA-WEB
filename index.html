@@ -58,7 +58,7 @@
 
     .mod-grid-inner {
       display: grid;
-      grid-template-columns: repeat(24, 1fr);
+      grid-template-columns: repeat(18, 1fr);
       gap: 0;
       width: 100%;
       height: 100%;
@@ -221,10 +221,9 @@
 
     .hero-grid {
       display: grid;
-      grid-template-columns: 1fr;
+      grid-template-columns: 1fr 1fr;
       gap: 3rem;
       align-items: center;
-      justify-items: center;
     }
 
     .hero-tag {
@@ -262,25 +261,6 @@
     @keyframes blink {
       0%, 100% { opacity: 1; }
       50% { opacity: 0; }
-    }
-
-    .hero-text {
-      max-width: 720px;
-      text-align: center;
-      margin: 0 auto;
-    }
-
-    .hero-text p {
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    .hero-actions {
-      justify-content: center;
-    }
-
-    .hero .hero-tag {
-      justify-content: center;
     }
 
     .hero h1 {
@@ -381,16 +361,20 @@
 
     /* ─── HERO VISUAL ─── */
     .hero-visual {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 400px;
+    }
+
+    .hero-visual-inner {
+      position: relative;
       width: 100%;
-      max-width: 700px;
+      max-width: 500px;
       aspect-ratio: 1;
-      opacity: 0.25;
-      z-index: 0;
-      filter: blur(1px);
+      margin: 0 auto;
+      filter: drop-shadow(0 0 40px rgba(81,112,255,0.08));
     }
 
     #globeCanvas {
@@ -1352,7 +1336,9 @@
 
     /* ─── RESPONSIVE ─── */
     @media (max-width: 1100px) {
-      .hero-grid { gap: 2rem; }
+      .hero-grid { grid-template-columns: 1fr; gap: 2rem; }
+      .hero-visual { min-height: 300px; }
+      .hero-visual-inner { max-width: 280px; }
       .problems-grid { grid-template-columns: 1fr 1fr; }
       .methodology-flow { grid-template-columns: repeat(3, 1fr); }
       .market-grid { grid-template-columns: 1fr 1fr; }
@@ -1376,7 +1362,19 @@
       .hero-stats { flex-direction: column; gap: 1.5rem; }
       .hero-stat h3 { font-size: 1.8rem; }
       .hero-actions { flex-direction: column; gap: 0.75rem; }
-      .hero-visual { max-width: 450px; opacity: 0.15; }
+      .hero-grid { grid-template-columns: 1fr; }
+      .hero-text { text-align: center; max-width: 600px; margin: 0 auto; }
+      .hero-text p { margin-left: auto; margin-right: auto; }
+      .hero-actions { justify-content: center; }
+      .hero .hero-tag { justify-content: center; }
+      .hero-visual {
+        position: absolute; top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        width: 100%; max-width: 450px;
+        opacity: 0.15; z-index: 0;
+        min-height: auto;
+      }
+      .hero-visual-inner { max-width: 100%; }
       .section-w { padding: 70px 1rem; }
       .about-grid { grid-template-columns: 1fr; }
       .about-cards { grid-template-columns: 1fr; }
@@ -1406,6 +1404,7 @@
       .hero h1 { font-size: 2rem; }
       .hero h1 .wordmark { font-size: 1em; }
       .hero-visual { max-width: 320px; }
+      .hero-visual-inner { max-width: 100%; }
       .hero-stat h3 { font-size: 1.5rem; }
       .section-w { padding: 50px 1rem; }
       .about-card { padding: 1.25rem; }
@@ -1426,6 +1425,7 @@
       footer .nav-logo-img { height: 60px; }
       .hero h1 { font-size: 1.7rem; }
       .hero-visual { max-width: 240px; }
+      .hero-visual-inner { max-width: 100%; }
       .hero-stat h3 { font-size: 1.3rem; }
       .section-w { padding: 40px 0.75rem; }
       .method-step-num { font-size: 1.8rem; }
@@ -1470,11 +1470,6 @@
     <div class="float-dot" style="top:30%;right:5%"></div>
     <div class="float-dot" style="bottom:20%;left:15%"></div>
     <div class="float-dot" style="top:55%;left:6%"></div>
-    <div class="hero-visual">
-      <canvas id="globeCanvas"></canvas>
-      <div class="hero-visual-ring"></div>
-      <div class="hero-visual-ring"></div>
-    </div>
     <div class="container">
       <div class="hero-grid">
         <div class="hero-text">
@@ -1501,6 +1496,13 @@
             <div class="hero-stat stagger-item"><h3>+200</h3><p>Procesos automatizados</p></div>
             <div class="hero-stat stagger-item"><h3>+50</h3><p>Empresas transformadas</p></div>
             <div class="hero-stat stagger-item"><h3>97%</h3><p>Casos de éxito</p></div>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <div class="hero-visual-inner">
+            <canvas id="globeCanvas"></canvas>
+            <div class="hero-visual-ring"></div>
+            <div class="hero-visual-ring"></div>
           </div>
         </div>
       </div>
@@ -1860,7 +1862,7 @@
       var grid = document.getElementById('modGridInner');
       if (!grid) return;
 
-      var COLS = 24, ROWS = 30;
+      var COLS = 18, ROWS = 22;
       var TOTAL = COLS * ROWS;
       var cells = [];
       var cursorX = -1, cursorY = -1;
@@ -1897,7 +1899,10 @@
       });
 
       var t = 0;
+      var hidden = false;
+      document.addEventListener('visibilitychange', function() { hidden = document.hidden; });
       function animate() {
+        if (hidden) { requestAnimationFrame(animate); return; }
         t += 0.018;
 
         // Decay trail
@@ -1983,7 +1988,7 @@
         verts.push(ring);
       }
 
-      var PCOUNT = 100;
+      var PCOUNT = 60;
       var particles = [];
       for (var i = 0; i < PCOUNT; i++) {
         var theta = Math.random() * 2 * Math.PI;
@@ -2015,34 +2020,18 @@
       }
 
       var angle = 0;
-      var mx = 0.5, my = 0.5;
       var rx = 0, ry = 0;
-      var trx = 0, try_ = 0;
-
-      document.addEventListener('mousemove', function(e) {
-        var rect = canvas.getBoundingClientRect();
-        mx = (e.clientX - rect.left) / W;
-        my = (e.clientY - rect.top) / H;
-      });
-      document.addEventListener('mouseleave', function() { mx = 0.5; my = 0.5; });
-
-      canvas.addEventListener('touchmove', function(e) {
-        e.preventDefault();
-        var rect = canvas.getBoundingClientRect();
-        var t = e.touches[0];
-        mx = (t.clientX - rect.left) / W;
-        my = (t.clientY - rect.top) / H;
-      }, { passive: false });
 
       var pc = [];
+      var hidden = false;
+      document.addEventListener('visibilitychange', function() { hidden = document.hidden; });
 
       function animate() {
+        if (hidden) { requestAnimationFrame(animate); return; }
         angle += 0.006;
 
-        trx = (my - 0.5) * 0.7 + Math.sin(angle * 0.12) * 0.06;
-        try_ = angle + (mx - 0.5) * 1.0;
-        rx += (trx - rx) * 0.06;
-        ry += (try_ - ry) * 0.06;
+        rx += (Math.sin(angle * 0.12) * 0.06 - rx) * 0.06;
+        ry += (angle - ry) * 0.06;
 
         ctx.clearRect(0, 0, W, H);
 
@@ -2073,7 +2062,15 @@
               sy: H / 2 + rv.y * R * persp,
               depth: rv.z,
               persp: persp
-            });
+    });
+
+    navToggle.addEventListener('click', function() {
+      navLinks.classList.toggle('open');
+    });
+
+    document.querySelectorAll('.nav-links a').forEach(function(link) {
+      link.addEventListener('click', function() { navLinks.classList.remove('open'); });
+    });
           }
           pc.push(row);
         }
@@ -2282,13 +2279,29 @@
       animate();
     })();
 
-    // ─── NAVBAR ───
+    // ─── NAVBAR & ACTIVE NAV ───
     var navbar = document.getElementById('navbar');
     var navToggle = document.getElementById('navToggle');
     var navLinks = document.getElementById('navLinks');
+    var sections = document.querySelectorAll('section[id]');
 
+    var ticking = false;
     window.addEventListener('scroll', function() {
-      navbar.classList.toggle('scrolled', window.scrollY > 40);
+      if (!ticking) {
+        requestAnimationFrame(function() {
+          var sy = window.scrollY;
+          navbar.classList.toggle('scrolled', sy > 40);
+          var current = '';
+          sections.forEach(function(s) {
+            if (sy >= s.offsetTop - 120) current = s.getAttribute('id');
+          });
+          document.querySelectorAll('.nav-links a:not(.nav-cta)').forEach(function(a) {
+            a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+          });
+          ticking = false;
+        });
+        ticking = true;
+      }
     });
 
     navToggle.addEventListener('click', function() {
