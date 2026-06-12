@@ -1,0 +1,12 @@
+{
+  "name": "mods-ia-web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MODS IA — Agencia de Consultoría en Automatización Inteligente",
+  "scripts": {
+    "dev": "vercel dev"
+  },
+  "dependencies": {
+    "nodemailer": "^6.9.16"
+  }
+}

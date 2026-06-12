@@ -17,6 +17,12 @@ Thumbs.db
 # Dependencies
 node_modules/
 
+# Build output
+.vercel/
+
+# Fonts are committed; ignore the CSS source if needed
+# fonts/
+
 # Logs
 *.log
 npm-debug.log*
