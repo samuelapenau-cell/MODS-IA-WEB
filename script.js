@@ -21,9 +21,6 @@ var isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     cells.push(el);
   }
 
-  function idx(col, row) { return row * COLS + col; }
-  function inBounds(col, row) { return col >= 0 && col < COLS && row >= 0 && row < ROWS; }
-
   cellW = window.innerWidth / COLS;
   window.addEventListener('resize', function () { cellW = window.innerWidth / COLS; });
 
@@ -37,7 +34,7 @@ var isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       if (cursorX >= 0 && !trail[prevIdx]) trail[prevIdx] = 0.5;
       cursorX = col; cursorY = row;
     }
-  });
+  }, { passive: true });
 
   document.addEventListener('mouseleave', function () {
     cursorX = -1; cursorY = -1;
@@ -45,7 +42,6 @@ var isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
   var t = 0;
   var hidden = false;
-  document.addEventListener('visibilitychange', function () { hidden = document.hidden; });
   function animate() {
     if (reducedMotion) return;
     if (hidden) { requestAnimationFrame(animate); return; }
@@ -93,6 +89,8 @@ var isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     requestAnimationFrame(animate);
   }
 
+  function idx(col, row) { return row * COLS + col; }
+
   animate();
 })();
 
@@ -119,14 +117,16 @@ var isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     R = Math.min(W, H) * 0.46;
   }
 
-  canvas.addEventListener('mousemove', function (e) {
-    var rect = canvas.getBoundingClientRect();
-    mouseX = (e.clientX - rect.left - W / 2) / (W / 2);
-    mouseY = (e.clientY - rect.top - H / 2) / (H / 2);
-  });
-  canvas.addEventListener('mouseleave', function () { mouseX = 0; mouseY = 0; });
+  if (!isMobile) {
+    canvas.addEventListener('mousemove', function (e) {
+      var rect = canvas.getBoundingClientRect();
+      mouseX = (e.clientX - rect.left - W / 2) / (W / 2);
+      mouseY = (e.clientY - rect.top - H / 2) / (H / 2);
+    }, { passive: true });
+    canvas.addEventListener('mouseleave', function () { mouseX = 0; mouseY = 0; });
+  }
 
-  var LATS = isMobile ? 12 : 24, LONS = isMobile ? 14 : 28;
+  var LATS = isMobile ? 10 : 24, LONS = isMobile ? 12 : 28;
   var verts = [];
   for (var i = 0; i <= LATS; i++) {
     var theta = (i / LATS) * Math.PI;
@@ -142,7 +142,7 @@ var isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     verts.push(ring);
   }
 
-  var NODES_N = isMobile ? 12 : 45;
+  var NODES_N = isMobile ? 8 : 45;
   var nodes = [];
   for (var i = 0; i < NODES_N; i++) {
     var theta = Math.random() * 2 * Math.PI;
@@ -158,28 +158,30 @@ var isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
   var connections = [];
   var CONN_DIST = 1.7;
-  for (var i = 0; i < nodes.length; i++) {
-    for (var j = i + 1; j < nodes.length; j++) {
-      var dx = nodes[i].x - nodes[j].x;
-      var dy = nodes[i].y - nodes[j].y;
-      var dz = nodes[i].z - nodes[j].z;
-      var dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
-      if (dist < CONN_DIST && dist > 0.3 && Math.random() < 0.2) {
-        var packets = [];
-        var numP = 1 + Math.floor(Math.random() * 3);
-        for (var p = 0; p < numP; p++) {
-          packets.push({
-            progress: Math.random(),
-            speed: 0.001 + Math.random() * 0.007,
-            size: 1 + Math.random() * 2
-          });
+  if (!isMobile) {
+    for (var i = 0; i < nodes.length; i++) {
+      for (var j = i + 1; j < nodes.length; j++) {
+        var dx = nodes[i].x - nodes[j].x;
+        var dy = nodes[i].y - nodes[j].y;
+        var dz = nodes[i].z - nodes[j].z;
+        var dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        if (dist < CONN_DIST && dist > 0.3 && Math.random() < 0.2) {
+          var packets = [];
+          var numP = 1 + Math.floor(Math.random() * 3);
+          for (var p = 0; p < numP; p++) {
+            packets.push({
+              progress: Math.random(),
+              speed: 0.001 + Math.random() * 0.007,
+              size: 1 + Math.random() * 2
+            });
+          }
+          connections.push({ a: i, b: j, dist: dist, packets: packets });
         }
-        connections.push({ a: i, b: j, dist: dist, packets: packets });
       }
     }
   }
 
-  var PARTICLE_N = isMobile ? 20 : 160;
+  var PARTICLE_N = isMobile ? 15 : 160;
   var particles = [];
   for (var i = 0; i < PARTICLE_N; i++) {
     var theta = Math.random() * 2 * Math.PI;
@@ -196,7 +198,7 @@ var isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     });
   }
 
-  var STARS_N = isMobile ? 30 : 220;
+  var STARS_N = isMobile ? 20 : 220;
   var stars = [];
   for (var i = 0; i < STARS_N; i++) {
     stars.push({
@@ -208,7 +210,9 @@ var isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     });
   }
 
-  var orbDefs = [
+  var orbDefs = isMobile ? [
+    { tilt: 0.3, radius: 1.35, speed: 0.35, phase: 0, color: 'rgba(81,112,255,0.12)', width: 1.5 }
+  ] : [
     { tilt: 0.3, radius: 1.35, speed: 0.35, phase: 0, color: 'rgba(81,112,255,0.12)', width: 1.5 },
     { tilt: -0.5, radius: 1.55, speed: -0.28, phase: 2.0, color: 'rgba(123,146,255,0.08)', width: 1.0 },
     { tilt: 0.6, radius: 1.18, speed: 0.42, phase: 1.5, color: 'rgba(203,212,255,0.06)', width: 0.8 },
@@ -242,7 +246,6 @@ var isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
   var angle = 0, time = 0;
   var hidden = false;
-  document.addEventListener('visibilitychange', function () { hidden = document.hidden; });
 
   function bezier3D(a, b, c, t) {
     var u = 1 - t;
@@ -299,7 +302,6 @@ var isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       }
       pc.push(row);
     }
-    function gp(i, j) { return pc[i][j % LONS]; }
 
     var pn = [];
     for (var i = 0; i < nodes.length; i++) {
@@ -311,7 +313,7 @@ var isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
         ctx.beginPath();
         var started = false;
         for (var j = 0; j <= LONS; j++) {
-          var p = gp(i, j);
+          var p = pc[i][j % LONS];
           if (p.depth < 0) {
             if (!started) { ctx.moveTo(p.sx, p.sy); started = true; }
             else ctx.lineTo(p.sx, p.sy);
@@ -325,7 +327,7 @@ var isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
         ctx.beginPath();
         var started = false;
         for (var i = 0; i <= LATS; i++) {
-          var p = gp(i, j);
+          var p = pc[i][j];
           if (p.depth < 0) {
             if (!started) { ctx.moveTo(p.sx, p.sy); started = true; }
             else ctx.lineTo(p.sx, p.sy);
@@ -360,7 +362,7 @@ var isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       ctx.beginPath();
       var started = false;
       for (var j = 0; j <= LONS; j++) {
-        var p = gp(i, j);
+        var p = pc[i][j % LONS];
         if (p.depth >= 0) {
           if (!started) { ctx.moveTo(p.sx, p.sy); started = true; }
           else ctx.lineTo(p.sx, p.sy);
@@ -375,7 +377,7 @@ var isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       ctx.beginPath();
       var started = false;
       for (var i = 0; i <= LATS; i++) {
-        var p = gp(i, j);
+        var p = pc[i][j];
         if (p.depth >= 0) {
           if (!started) { ctx.moveTo(p.sx, p.sy); started = true; }
           else ctx.lineTo(p.sx, p.sy);
@@ -386,57 +388,59 @@ var isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       ctx.stroke();
     }
 
-    for (var ci = 0; ci < connections.length; ci++) {
-      var conn = connections[ci];
-      var pA = pn[conn.a], pB = pn[conn.b];
-      if (pA.depth < -0.1 && pB.depth < -0.1) continue;
+    if (!isMobile) {
+      for (var ci = 0; ci < connections.length; ci++) {
+        var conn = connections[ci];
+        var pA = pn[conn.a], pB = pn[conn.b];
+        if (pA.depth < -0.1 && pB.depth < -0.1) continue;
 
-      var mid = mid3D(nodes[conn.a], nodes[conn.b], 0.35 + conn.dist * 0.15);
-      var pM = project(mid, rx, ry);
-      var avgD = (pA.depth + pB.depth + pM.depth) / 3;
+        var mid = mid3D(nodes[conn.a], nodes[conn.b], 0.35 + conn.dist * 0.15);
+        var pM = project(mid, rx, ry);
+        var avgD = (pA.depth + pB.depth + pM.depth) / 3;
 
-      if (avgD > -0.2) {
-        var alpha = Math.min(0.55, (avgD + 0.3) * 0.35);
-        var grad = ctx.createLinearGradient(pA.sx, pA.sy, pB.sx, pB.sy);
-        grad.addColorStop(0, 'rgba(81,112,255,' + (alpha * 0.3).toFixed(3) + ')');
-        grad.addColorStop(0.5, 'rgba(123,146,255,' + (alpha * 0.6).toFixed(3) + ')');
-        grad.addColorStop(1, 'rgba(81,112,255,' + (alpha * 0.3).toFixed(3) + ')');
+        if (avgD > -0.2) {
+          var alpha = Math.min(0.55, (avgD + 0.3) * 0.35);
+          var grad = ctx.createLinearGradient(pA.sx, pA.sy, pB.sx, pB.sy);
+          grad.addColorStop(0, 'rgba(81,112,255,' + (alpha * 0.3).toFixed(3) + ')');
+          grad.addColorStop(0.5, 'rgba(123,146,255,' + (alpha * 0.6).toFixed(3) + ')');
+          grad.addColorStop(1, 'rgba(81,112,255,' + (alpha * 0.3).toFixed(3) + ')');
 
-        ctx.beginPath();
-        ctx.moveTo(pA.sx, pA.sy);
-        ctx.quadraticCurveTo(pM.sx, pM.sy, pB.sx, pB.sy);
-        ctx.strokeStyle = grad;
-        ctx.lineWidth = 0.8 + alpha * 0.6;
-        ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(pA.sx, pA.sy);
+          ctx.quadraticCurveTo(pM.sx, pM.sy, pB.sx, pB.sy);
+          ctx.strokeStyle = grad;
+          ctx.lineWidth = 0.8 + alpha * 0.6;
+          ctx.stroke();
 
-        ctx.beginPath();
-        ctx.moveTo(pA.sx, pA.sy);
-        ctx.quadraticCurveTo(pM.sx, pM.sy, pB.sx, pB.sy);
-        ctx.strokeStyle = 'rgba(81,112,255,' + (alpha * 0.06).toFixed(3) + ')';
-        ctx.lineWidth = 5;
-        ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(pA.sx, pA.sy);
+          ctx.quadraticCurveTo(pM.sx, pM.sy, pB.sx, pB.sy);
+          ctx.strokeStyle = 'rgba(81,112,255,' + (alpha * 0.06).toFixed(3) + ')';
+          ctx.lineWidth = 5;
+          ctx.stroke();
 
-        for (var pk = 0; pk < conn.packets.length; pk++) {
-          var packet = conn.packets[pk];
-          packet.progress += packet.speed;
-          if (packet.progress > 1) packet.progress -= 1;
-          var t = packet.progress;
-          var pos = bezier3D(nodes[conn.a], mid, nodes[conn.b], t);
-          var pp = project(pos, rx, ry);
-          if (pp.depth > -0.1) {
-            var pa = Math.min(0.85, (pp.depth + 0.3) * 0.5);
-            ctx.beginPath();
-            ctx.arc(pp.sx, pp.sy, packet.size * 3.5, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(123,146,255,' + (pa * 0.12).toFixed(3) + ')';
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(pp.sx, pp.sy, packet.size * 1.2, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(180,200,255,' + pa.toFixed(2) + ')';
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(pp.sx, pp.sy, packet.size * 0.4, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(230,235,255,' + pa.toFixed(2) + ')';
-            ctx.fill();
+          for (var pk = 0; pk < conn.packets.length; pk++) {
+            var packet = conn.packets[pk];
+            packet.progress += packet.speed;
+            if (packet.progress > 1) packet.progress -= 1;
+            var t = packet.progress;
+            var pos = bezier3D(nodes[conn.a], mid, nodes[conn.b], t);
+            var pp = project(pos, rx, ry);
+            if (pp.depth > -0.1) {
+              var pa = Math.min(0.85, (pp.depth + 0.3) * 0.5);
+              ctx.beginPath();
+              ctx.arc(pp.sx, pp.sy, packet.size * 3.5, 0, Math.PI * 2);
+              ctx.fillStyle = 'rgba(123,146,255,' + (pa * 0.12).toFixed(3) + ')';
+              ctx.fill();
+              ctx.beginPath();
+              ctx.arc(pp.sx, pp.sy, packet.size * 1.2, 0, Math.PI * 2);
+              ctx.fillStyle = 'rgba(180,200,255,' + pa.toFixed(2) + ')';
+              ctx.fill();
+              ctx.beginPath();
+              ctx.arc(pp.sx, pp.sy, packet.size * 0.4, 0, Math.PI * 2);
+              ctx.fillStyle = 'rgba(230,235,255,' + pa.toFixed(2) + ')';
+              ctx.fill();
+            }
           }
         }
       }
@@ -534,7 +538,7 @@ var isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
         var col = Math.floor(s);
         var found = false;
         for (var r = 0; r <= LATS; r++) {
-          var pp = gp(r, col);
+          var pp = pc[r][col];
           if (Math.abs(pp.sy - (H / 2 + scanY)) < 3.5 && pp.depth > 0) {
             if (!found) { ctx.moveTo(pp.sx - 4, pp.sy); found = true; }
             ctx.lineTo(pp.sx + 4, pp.sy);
@@ -549,7 +553,7 @@ var isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
         var col = Math.floor(s);
         var found = false;
         for (var r = 0; r <= LATS; r++) {
-          var pp = gp(r, col);
+          var pp = pc[r][col];
           if (Math.abs(pp.sy - (H / 2 + scanY)) < 3.5 && pp.depth > 0) {
             if (!found) { ctx.moveTo(pp.sx - 8, pp.sy); found = true; }
             ctx.lineTo(pp.sx + 8, pp.sy);
@@ -607,7 +611,7 @@ window.addEventListener('scroll', function () {
     });
     ticking = true;
   }
-});
+}, { passive: true });
 
 navToggle.addEventListener('click', function () {
   var isOpen = navLinks.classList.toggle('open');
@@ -615,6 +619,14 @@ navToggle.addEventListener('click', function () {
   if (isOpen) {
     var firstLink = navLinks.querySelector('a');
     if (firstLink) firstLink.focus();
+  }
+});
+
+navLinks.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') {
+    navLinks.classList.remove('open');
+    navToggle.setAttribute('aria-expanded', 'false');
+    navToggle.focus();
   }
 });
 
@@ -662,17 +674,57 @@ document.querySelectorAll('.reveal').forEach(function (el) { observer.observe(el
 (function () {
   var chars = document.querySelectorAll('#heroHeadline .word-char');
   if (!chars.length) return;
-  var delay = 0;
-  chars.forEach(function (el) {
-    var d = parseInt(el.style.transitionDelay) || delay;
-    setTimeout(function () { el.classList.add('visible'); }, d + 300);
-    delay = d + 80;
-  });
+  setTimeout(function () {
+    var delay = 0;
+    chars.forEach(function (el) {
+      setTimeout(function () { el.classList.add('visible'); }, delay + 300);
+      delay += 80;
+    });
+  }, 100);
 })();
 
 (function () {
   var form = document.getElementById('contactForm');
   if (!form) return;
+
+  var nameInput = form.querySelector('[name="Nombre"]');
+  var emailInput = form.querySelector('[name="Email"]');
+  var phoneInput = form.querySelector('[name="Telefono"]');
+  var companyInput = form.querySelector('[name="Empresa"]');
+  var serviceInput = form.querySelector('[name="Interes"]');
+  var messageInput = form.querySelector('[name="Mensaje"]');
+
+  function getFieldError(el) {
+    return el.parentElement.querySelector('.field-error');
+  }
+
+  function showError(el, msg) {
+    var err = getFieldError(el);
+    if (err) {
+      err.textContent = msg;
+      err.classList.add('visible');
+    }
+    el.parentElement.classList.add('input-error');
+  }
+
+  function clearError(el) {
+    var err = getFieldError(el);
+    if (err) {
+      err.textContent = '';
+      err.classList.remove('visible');
+    }
+    el.parentElement.classList.remove('input-error');
+  }
+
+  function clearAllErrors() {
+    form.querySelectorAll('.field-error').forEach(function (e) {
+      e.textContent = '';
+      e.classList.remove('visible');
+    });
+    form.querySelectorAll('.input-error').forEach(function (e) {
+      e.classList.remove('input-error');
+    });
+  }
 
   function sanitize(str) {
     var d = document.createElement('div');
@@ -680,31 +732,51 @@ document.querySelectorAll('.reveal').forEach(function (el) { observer.observe(el
     return d.textContent;
   }
 
-  function validate(data) {
-    var errors = [];
-    if (!data.Nombre || data.Nombre.trim().length < 2) errors.push('El nombre debe tener al menos 2 caracteres.');
-    if (data.Nombre && data.Nombre.length > 100) errors.push('El nombre es demasiado largo.');
+  function validate() {
+    var valid = true;
+    clearAllErrors();
+
+    var name = nameInput.value.trim();
+    if (name.length < 2) { showError(nameInput, 'Mínimo 2 caracteres'); valid = false; }
+    if (name.length > 100) { showError(nameInput, 'Máximo 100 caracteres'); valid = false; }
+
+    var email = emailInput.value.trim();
     var emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRe.test(data.Email)) errors.push('Ingresa un email válido.');
-    if (data.Email && data.Email.length > 200) errors.push('El email es demasiado largo.');
-    if (data.Telefono && data.Telefono.trim()) {
-      if (data.Telefono.length > 20) errors.push('El teléfono es demasiado largo.');
-      var phoneClean = data.Telefono.replace(/[\s\-\(\)\+]/g, '');
-      if (phoneClean.length < 7) errors.push('Ingresa un teléfono válido.');
+    if (!emailRe.test(email)) { showError(emailInput, 'Email inválido'); valid = false; }
+    if (email.length > 200) { showError(emailInput, 'Email demasiado largo'); valid = false; }
+
+    var phone = phoneInput.value.trim();
+    if (phone.length > 0) {
+      if (phone.length > 20) { showError(phoneInput, 'Teléfono demasiado largo'); valid = false; }
+      var phoneClean = phone.replace(/[\s\-\(\)\+]/g, '');
+      if (phoneClean.length < 7) { showError(phoneInput, 'Teléfono inválido (mín. 7 dígitos)'); valid = false; }
     }
-    if (data.Empresa && data.Empresa.length > 200) errors.push('El nombre de empresa es demasiado largo.');
-    if (!data.Mensaje || data.Mensaje.trim().length < 10) errors.push('El mensaje debe tener al menos 10 caracteres.');
-    if (data.Mensaje && data.Mensaje.length > 2000) errors.push('El mensaje es demasiado largo.');
-    return errors;
+
+    var company = companyInput.value.trim();
+    if (company.length > 200) { showError(companyInput, 'Máximo 200 caracteres'); valid = false; }
+
+    var message = messageInput.value.trim();
+    if (message.length < 10) { showError(messageInput, 'Mínimo 10 caracteres'); valid = false; }
+    if (message.length > 2000) { showError(messageInput, 'Máximo 2000 caracteres'); valid = false; }
+
+    return valid;
   }
+
+  [nameInput, emailInput, phoneInput, companyInput, messageInput].forEach(function (input) {
+    input.addEventListener('input', function () {
+      if (input.parentElement.classList.contains('input-error')) {
+        clearError(input);
+      }
+    });
+  });
 
   form.addEventListener('submit', function (e) {
     e.preventDefault();
 
     var honey = form.querySelector('[name="_honey"]');
-    if (honey && honey.value) {
-      return;
-    }
+    if (honey && honey.value) return;
+
+    if (!validate()) return;
 
     var body = form.querySelector('.form-body');
     var success = form.querySelector('.form-success');
@@ -712,22 +784,17 @@ document.querySelectorAll('.reveal').forEach(function (el) { observer.observe(el
     var originalText = btn.innerHTML;
 
     var data = {
-      Nombre: sanitize(form.querySelector('[name="Nombre"]').value),
-      Email: sanitize(form.querySelector('[name="Email"]').value),
-      Telefono: sanitize(form.querySelector('[name="Telefono"]').value),
-      Empresa: sanitize(form.querySelector('[name="Empresa"]').value),
-      Interes: sanitize(form.querySelector('[name="Interes"]').value),
-      Mensaje: sanitize(form.querySelector('[name="Mensaje"]').value)
+      Nombre: sanitize(nameInput.value),
+      Email: sanitize(emailInput.value),
+      Telefono: sanitize(phoneInput.value),
+      Empresa: sanitize(companyInput.value),
+      Interes: serviceInput.value,
+      Mensaje: sanitize(messageInput.value)
     };
 
-    var errs = validate(data);
-    if (errs.length) {
-      alert(errs.join('\n'));
-      return;
-    }
-
     btn.disabled = true;
-    btn.innerHTML = 'Enviando...';
+    btn.classList.add('btn-loading');
+    btn.innerHTML = '<span class="btn-spinner"></span><span class="btn-text">Enviando...</span>';
 
     fetch('/api/contact', {
       method: 'POST',
@@ -750,19 +817,22 @@ document.querySelectorAll('.reveal').forEach(function (el) { observer.observe(el
             body.classList.remove('is-submitted');
             success.classList.remove('visible');
             form.reset();
+            clearAllErrors();
             btn.disabled = false;
+            btn.classList.remove('btn-loading');
             btn.innerHTML = originalText;
           }, 5000);
         } else {
-          alert(json.error || 'Error al enviar. Intenta de nuevo.');
+          showError(messageInput, json.error || 'Error al enviar. Intenta de nuevo.');
           btn.disabled = false;
+          btn.classList.remove('btn-loading');
           btn.innerHTML = originalText;
         }
       })
       .catch(function (err) {
-        console.error('Error al enviar formulario:', err);
-        alert(err.message || 'Error de conexión. Intenta de nuevo.');
+        showError(messageInput, err.message || 'Error de conexión. Intenta de nuevo.');
         btn.disabled = false;
+        btn.classList.remove('btn-loading');
         btn.innerHTML = originalText;
       });
   });
@@ -774,23 +844,19 @@ document.querySelectorAll('.reveal').forEach(function (el) { observer.observe(el
   document.body.appendChild(el);
   var tx = -100, ty = -100;
   var cx = -100, cy = -100;
-  var hidden = false;
-  document.addEventListener('visibilitychange', function () { hidden = document.hidden; });
   document.addEventListener('mousemove', function (e) {
     tx = e.clientX; ty = e.clientY;
     el.style.display = 'block';
-  });
+  }, { passive: true });
   document.addEventListener('mouseleave', function () { el.style.display = 'none'; });
   document.querySelectorAll('a, button, .btn, input, textarea').forEach(function (n) {
     n.addEventListener('mouseenter', function () { el.classList.add('is-link'); });
     n.addEventListener('mouseleave', function () { el.classList.remove('is-link'); });
   });
   function follow() {
-    if (!hidden) {
-      cx += (tx - cx) * 0.12;
-      cy += (ty - cy) * 0.12;
-      el.style.transform = 'translate(' + cx + 'px, ' + cy + 'px) translate(-50%, -50%)';
-    }
+    cx += (tx - cx) * 0.12;
+    cy += (ty - cy) * 0.12;
+    el.style.transform = 'translate(' + cx + 'px, ' + cy + 'px) translate(-50%, -50%)';
     requestAnimationFrame(follow);
   }
   setTimeout(follow, 50);
@@ -800,12 +866,19 @@ document.querySelectorAll('.reveal').forEach(function (el) { observer.observe(el
   var bar = document.createElement('div');
   bar.className = 'scroll-progress';
   document.body.appendChild(bar);
+  var ticking = false;
   window.addEventListener('scroll', function () {
-    var scrollTop = window.scrollY;
-    var docHeight = document.documentElement.scrollHeight - window.innerHeight;
-    var pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
-    bar.style.width = pct + '%';
-  });
+    if (!ticking) {
+      requestAnimationFrame(function () {
+        var scrollTop = window.scrollY;
+        var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        var pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        bar.style.width = pct + '%';
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
 })();
 
 document.querySelectorAll('.btn').forEach(function (btn) {
@@ -848,7 +921,7 @@ document.querySelectorAll('.btn').forEach(function (btn) {
   var stats = document.querySelectorAll('.hero-stat h3');
   if (!stats.length) return;
   var targets = [];
-  stats.forEach(function (s, i) {
+  stats.forEach(function (s) {
     var text = s.textContent.trim();
     var prefix = text.charAt(0);
     var suffix = text.slice(-1);
@@ -857,32 +930,27 @@ document.querySelectorAll('.btn').forEach(function (btn) {
     if (numStr.slice(-1) === '%' || numStr.slice(-1) === '+' || numStr.slice(-1) === 'K') numStr = numStr.slice(0, -1);
     var num = parseFloat(numStr);
     if (isNaN(num)) return;
-    var finalDisplay = text;
-    targets.push({ el: s, target: num, prefix: prefix === '+' || prefix === '\u2212' ? prefix : '', suffix: suffix === '%' || suffix === '+' || suffix === 'K' ? suffix : '', final: finalDisplay });
+    targets.push({ el: s, target: num, prefix: prefix === '+' || prefix === '\u2212' ? prefix : '', suffix: suffix === '%' || suffix === '+' || suffix === 'K' ? suffix : '', final: text });
     s.dataset.counted = 'false';
   });
   var observer = new IntersectionObserver(function (entries) {
     entries.forEach(function (entry) {
       if (!entry.isIntersecting) return;
-      var t = targets[Array.from(stats).indexOf(entry.target)];
+      var idx = Array.from(stats).indexOf(entry.target);
+      var t = targets[idx];
       if (!t || t.el.dataset.counted === 'true') return;
       t.el.dataset.counted = 'true';
       observer.unobserve(t.el);
-      var allDone = true;
-      targets.forEach(function (tt) { if (tt.el.dataset.counted !== 'true') allDone = false; });
-      if (allDone) observer.disconnect();
       var start = 0;
       var duration = 1200 + Math.random() * 400;
       var startTime = performance.now();
-      var prefix = t.final.match(/^[+\u2212]/) ? t.final[0] : '';
-      var suffix = t.final.match(/[%+K]$/) ? t.final.slice(-1) : '';
       function count(now) {
         var p = Math.min((now - startTime) / duration, 1);
         var eased = 1 - Math.pow(1 - p, 3);
         var val = Math.round(eased * t.target);
         var display = val;
         if (t.target % 1 !== 0) display = (eased * t.target).toFixed(1);
-        t.el.textContent = prefix + display + suffix;
+        t.el.textContent = t.prefix + display + t.suffix;
         if (p < 1) requestAnimationFrame(count);
         else t.el.textContent = t.final;
       }
