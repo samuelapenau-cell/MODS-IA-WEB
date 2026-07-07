@@ -915,14 +915,26 @@
     }
 
     /* ─── PORTFOLIO ─── */
-    #portfolio { background: var(--surface); }
+    #portfolio {
+      background: var(--surface);
+      position: relative;
+      overflow: hidden;
+    }
+
+    #portfolio::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(81,112,255,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
 
     .portfolio-intro {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 3rem;
       margin-top: 2.5rem;
-      margin-bottom: 2.5rem;
+      margin-bottom: 3rem;
     }
 
     .portfolio-intro p {
@@ -934,51 +946,121 @@
     .portfolio-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 1px;
-      background: var(--border);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
+      gap: 1.5rem;
     }
 
     .portfolio-card {
-      background: var(--surface);
-      padding: 2.5rem 2rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0;
       transition: var(--transition);
       position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
 
-    .portfolio-card:hover { background: #1E2030; }
-
-    .portfolio-card::after {
+    .portfolio-card::before {
       content: '';
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 3px;
-      height: 100%;
-      background: var(--gradient-1);
+      inset: -1px;
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, transparent 40%, rgba(81,112,255,0.1), transparent 70%);
+      z-index: 0;
       opacity: 0;
+      transition: opacity 0.6s var(--ease);
+    }
+
+    .portfolio-card:hover::before { opacity: 1; }
+
+    .portfolio-card-accent {
+      height: 5px;
+      width: 100%;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .portfolio-card-accent.stockflow { background: linear-gradient(90deg, #5170ff, #7B92FF); }
+    .portfolio-card-accent.honda { background: linear-gradient(90deg, #E02020, #FF4444); }
+    .portfolio-card-accent.nortesur { background: linear-gradient(90deg, #D4A853, #F5D68A); }
+    .portfolio-card-accent.lumina { background: linear-gradient(90deg, #C084FC, #E9AFFA); }
+
+    .portfolio-card-body {
+      padding: 1.75rem 2rem 2rem;
+      position: relative;
+      z-index: 1;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .portfolio-card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .portfolio-card-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 800;
+      font-size: 1rem;
+      flex-shrink: 0;
       transition: var(--transition);
     }
 
-    .portfolio-card:hover::after { opacity: 1; }
+    .portfolio-card-icon.stockflow {
+      background: rgba(81,112,255,0.12);
+      color: #7B92FF;
+      border: 1px solid rgba(81,112,255,0.15);
+    }
+    .portfolio-card-icon.honda {
+      background: rgba(224,32,32,0.12);
+      color: #FF4444;
+      border: 1px solid rgba(224,32,32,0.15);
+    }
+    .portfolio-card-icon.nortesur {
+      background: rgba(212,168,83,0.12);
+      color: #D4A853;
+      border: 1px solid rgba(212,168,83,0.15);
+    }
+    .portfolio-card-icon.lumina {
+      background: rgba(192,132,252,0.12);
+      color: #C084FC;
+      border: 1px solid rgba(192,132,252,0.15);
+    }
+
+    .portfolio-card:hover .portfolio-card-icon.stockflow { background: rgba(81,112,255,0.2); border-color: rgba(81,112,255,0.3); }
+    .portfolio-card:hover .portfolio-card-icon.honda { background: rgba(224,32,32,0.2); border-color: rgba(224,32,32,0.3); }
+    .portfolio-card:hover .portfolio-card-icon.nortesur { background: rgba(212,168,83,0.2); border-color: rgba(212,168,83,0.3); }
+    .portfolio-card:hover .portfolio-card-icon.lumina { background: rgba(192,132,252,0.2); border-color: rgba(192,132,252,0.3); }
 
     .portfolio-card-badge {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.65rem;
+      font-size: 0.6rem;
       font-weight: 500;
       text-transform: uppercase;
       letter-spacing: 1.5px;
-      color: var(--primary);
-      margin-bottom: 0.75rem;
+      color: var(--dim);
+      margin-top: 0.15rem;
+      flex-shrink: 0;
     }
 
     .portfolio-card h4 {
       font-family: 'Space Grotesk', sans-serif;
-      font-size: 1.1rem;
-      font-weight: 600;
+      font-size: 1.2rem;
+      font-weight: 700;
       margin-bottom: 0.5rem;
+      letter-spacing: -0.3px;
     }
 
     .portfolio-card p {
@@ -986,24 +1068,57 @@
       color: var(--muted);
       line-height: 1.7;
       margin-bottom: 1.25rem;
+      flex: 1;
+    }
+
+    .portfolio-card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-top: auto;
     }
 
     .portfolio-tags {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.4rem;
+      gap: 0.35rem;
     }
 
     .portfolio-tag {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.6rem;
-      padding: 0.2rem 0.6rem;
-      background: rgba(81, 112, 255, 0.08);
-      border: 1px solid rgba(81, 112, 255, 0.12);
+      font-size: 0.55rem;
+      padding: 0.2rem 0.55rem;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
       border-radius: 999px;
-      color: var(--primary-light);
+      color: var(--muted);
       letter-spacing: 0.3px;
     }
+
+    .portfolio-link {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--primary-light);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+
+    .portfolio-link:hover { gap: 10px; opacity: 0.85; }
+
+    .portfolio-link svg { width: 12px; height: 12px; transition: transform 0.3s var(--ease); }
+    .portfolio-link:hover svg { transform: translateX(3px); }
+
+    .portfolio-card.honda h4 { color: #FF5555; }
+    .portfolio-card.nortesur h4 { color: #D4A853; }
+    .portfolio-card.lumina h4 { color: #C084FC; }
+    .portfolio-card.stockflow h4 { color: var(--primary-light); }
 
     /* ─── BANNER ─── */
     .banner {
@@ -1404,8 +1519,13 @@
         box-shadow: 0 0 20px rgba(81,112,255,0.1);
       }
       .portfolio-card:hover {
-        transform: translateY(-3px);
+        transform: translateY(-4px);
+        border-color: rgba(81,112,255,0.2);
+        box-shadow: 0 12px 40px rgba(0,0,0,0.25);
       }
+      .portfolio-card.honda:hover { border-color: rgba(224,32,32,0.25); }
+      .portfolio-card.nortesur:hover { border-color: rgba(212,168,83,0.2); }
+      .portfolio-card.lumina:hover { border-color: rgba(192,132,252,0.2); }
       .business-card:hover {
         transform: translateY(-3px);
         border-color: rgba(81,112,255,0.2);
@@ -1579,7 +1699,7 @@
       .solution-grid { grid-template-columns: 1fr; }
       .market-grid { grid-template-columns: 1fr; }
       .portfolio-grid { grid-template-columns: 1fr; }
-      .portfolio-card { padding: 1.75rem 1.25rem; }
+      .portfolio-card-body { padding: 1.25rem 1.25rem 1.5rem; }
       .business-grid { grid-template-columns: 1fr; }
       .contact-grid { grid-template-columns: 1fr; }
       .form-row { grid-template-columns: 1fr; }
@@ -1610,6 +1730,7 @@
       .method-step { padding: 1.5rem 1.25rem; }
       .method-step-num { font-size: 2.2rem; }
       .market-card { padding: 1.75rem 1.25rem 1.5rem; }
+      .portfolio-card-body { padding: 1.25rem 1rem 1.5rem; }
       .business-card { padding: 1.75rem 1.25rem; }
       .contact-channel { padding: 0.75rem 1rem; }
       .about-claim { font-size: 1.2rem; }
@@ -1864,52 +1985,106 @@
 
   <!-- ─── PORTFOLIO ─── -->
   <section id="portfolio">
+    <div class="glow-blob glow-blob-1" style="top:5%;right:-5%;"></div>
+    <div class="glow-blob glow-blob-2" style="bottom:10%;left:-8%;"></div>
     <div class="section-w">
       <span class="section-tag reveal">Portafolio</span>
       <h2 class="section-title reveal">Proyectos que hablan por sí solos</h2>
       <div class="portfolio-intro">
-        <p class="reveal">Estos son algunos de los proyectos donde hemos aplicado inteligencia artificial y automatización para generar resultados reales en negocios como el tuyo.</p>
-        <p class="reveal">Cada solución fue diseñada a la medida, integrada con las herramientas existentes y optimizada para generar impacto desde el primer día.</p>
+        <p class="reveal">Cada línea de código que escribimos se traduce en productos reales, funcionales y desplegados. Estos son algunos de los proyectos que hemos construido de principio a fin.</p>
+        <p class="reveal">Desde plataformas SaaS hasta sitios institucionales y tiendas en línea — todos diseñados con propósito, desarrollados con las tecnologías adecuadas y puestos en producción.</p>
       </div>
-      <div class="portfolio-grid reveal" data-stagger="80">
-        <div class="portfolio-card stagger-item">
-          <div class="portfolio-card-badge">Automatización de procesos</div>
-          <h4>CRM y Reportes Comerciales Automatizados</h4>
-          <p>Integración de datos de ventas, generación automática de informes semanales y sincronización con herramientas de facturación.</p>
-          <div class="portfolio-tags">
-            <span class="portfolio-tag">Python</span>
-            <span class="portfolio-tag">APIs</span>
-            <span class="portfolio-tag">SQL</span>
+      <div class="portfolio-grid reveal" data-stagger="100">
+        <div class="portfolio-card stagger-item stockflow">
+          <div class="portfolio-card-accent stockflow"></div>
+          <div class="portfolio-card-body">
+            <div class="portfolio-card-header">
+              <div class="portfolio-card-icon stockflow">SF</div>
+              <span class="portfolio-card-badge">Plataforma SaaS</span>
+            </div>
+            <h4>StockFlow</h4>
+            <p>Plataforma de gestión de inventario inteligente con creación de productos por texto, escaneo de facturas y códigos de barras, reportes analíticos e inteligencia artificial integrada.</p>
+            <div class="portfolio-card-footer">
+              <div class="portfolio-tags">
+                <span class="portfolio-tag">Next.js</span>
+                <span class="portfolio-tag">IA</span>
+                <span class="portfolio-tag">PostgreSQL</span>
+                <span class="portfolio-tag">APIs</span>
+              </div>
+              <a href="https://stockflow-five-black.vercel.app/" target="_blank" rel="noopener noreferrer" class="portfolio-link">
+                Visitar
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </a>
+            </div>
           </div>
         </div>
-        <div class="portfolio-card stagger-item">
-          <div class="portfolio-card-badge">Agentes de IA</div>
-          <h4>Asistente Virtual de Atención al Cliente</h4>
-          <p>Agente conversacional entrenado con el historial y políticas de la empresa, capaz de resolver consultas y escalar casos complejos.</p>
-          <div class="portfolio-tags">
-            <span class="portfolio-tag">IA</span>
-            <span class="portfolio-tag">NLP</span>
-            <span class="portfolio-tag">WhatsApp API</span>
+        <div class="portfolio-card stagger-item honda">
+          <div class="portfolio-card-accent honda"></div>
+          <div class="portfolio-card-body">
+            <div class="portfolio-card-header">
+              <div class="portfolio-card-icon honda">HM</div>
+              <span class="portfolio-card-badge">Web Corporativa</span>
+            </div>
+            <h4>Honda Maracay</h4>
+            <p>Sitio web oficial del concesionario Honda con catálogo de modelos, fichas técnicas, taller de servicio, cotizaciones por WhatsApp, agenda de citas y sistema de repuestos originales.</p>
+            <div class="portfolio-card-footer">
+              <div class="portfolio-tags">
+                <span class="portfolio-tag">HTML/CSS</span>
+                <span class="portfolio-tag">JavaScript</span>
+                <span class="portfolio-tag">Responsive</span>
+                <span class="portfolio-tag">SEO</span>
+              </div>
+              <a href="https://honda-maracay.vercel.app/" target="_blank" rel="noopener noreferrer" class="portfolio-link">
+                Visitar
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </a>
+            </div>
           </div>
         </div>
-        <div class="portfolio-card stagger-item">
-          <div class="portfolio-card-badge">Paneles de decisión</div>
-          <h4>Dashboard de Indicadores Financieros</h4>
-          <p>Plataforma en tiempo real con visualización de KPIs, alertas inteligentes y proyecciones automatizadas para la toma de decisiones.</p>
-          <div class="portfolio-tags">
-            <span class="portfolio-tag">Power BI</span>
-            <span class="portfolio-tag">ETL</span>
-            <span class="portfolio-tag">SQL</span>
+        <div class="portfolio-card stagger-item nortesur">
+          <div class="portfolio-card-accent nortesur"></div>
+          <div class="portfolio-card-body">
+            <div class="portfolio-card-header">
+              <div class="portfolio-card-icon nortesur">NS</div>
+              <span class="portfolio-card-badge">E-commerce</span>
+            </div>
+            <h4>Norte Sur Company</h4>
+            <p>Tienda online de streetwear premium con catálogo de franelas oversize, hoodies, joggers y accesorios. Carrito de compras, pasarela de pago y envíos a todo Venezuela.</p>
+            <div class="portfolio-card-footer">
+              <div class="portfolio-tags">
+                <span class="portfolio-tag">Next.js</span>
+                <span class="portfolio-tag">Tailwind</span>
+                <span class="portfolio-tag">E-commerce</span>
+                <span class="portfolio-tag">UI/UX</span>
+              </div>
+              <a href="https://norte-sur-company.vercel.app/" target="_blank" rel="noopener noreferrer" class="portfolio-link">
+                Visitar
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </a>
+            </div>
           </div>
         </div>
-        <div class="portfolio-card stagger-item">
-          <div class="portfolio-card-badge">Automatización de procesos</div>
-          <h4>Workflow de Aprobaciones Automatizado</h4>
-          <p>Sistema que reemplazó 12 horas semanales de gestión manual de aprobaciones por un flujo automatizado con reglas de negocio inteligentes.</p>
-          <div class="portfolio-tags">
-            <span class="portfolio-tag">No-Code</span>
-            <span class="portfolio-tag">APIs</span>
-            <span class="portfolio-tag">Webhooks</span>
+        <div class="portfolio-card stagger-item lumina">
+          <div class="portfolio-card-accent lumina"></div>
+          <div class="portfolio-card-body">
+            <div class="portfolio-card-header">
+              <div class="portfolio-card-icon lumina">LU</div>
+              <span class="portfolio-card-badge">Landing Page</span>
+            </div>
+            <h4>Lumina Dental Studio</h4>
+            <p>Estudio dental boutique con diseño de experiencia tipo spa. Filosofía de marca, servicios de odontología estética, testimonios de pacientes y reserva de citas online.</p>
+            <div class="portfolio-card-footer">
+              <div class="portfolio-tags">
+                <span class="portfolio-tag">HTML/CSS</span>
+                <span class="portfolio-tag">UX Design</span>
+                <span class="portfolio-tag">Responsive</span>
+                <span class="portfolio-tag">Animaciones</span>
+              </div>
+              <a href="https://odontologos-lime.vercel.app/" target="_blank" rel="noopener noreferrer" class="portfolio-link">
+                Visitar
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </a>
+            </div>
           </div>
         </div>
       </div>
