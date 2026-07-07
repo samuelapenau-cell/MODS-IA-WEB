@@ -914,6 +914,97 @@
       line-height: 1.6;
     }
 
+    /* ─── PORTFOLIO ─── */
+    #portfolio { background: var(--surface); }
+
+    .portfolio-intro {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      margin-top: 2.5rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .portfolio-intro p {
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.8;
+    }
+
+    .portfolio-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .portfolio-card {
+      background: var(--surface);
+      padding: 2.5rem 2rem;
+      transition: var(--transition);
+      position: relative;
+    }
+
+    .portfolio-card:hover { background: #1E2030; }
+
+    .portfolio-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 3px;
+      height: 100%;
+      background: var(--gradient-1);
+      opacity: 0;
+      transition: var(--transition);
+    }
+
+    .portfolio-card:hover::after { opacity: 1; }
+
+    .portfolio-card-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--primary);
+      margin-bottom: 0.75rem;
+    }
+
+    .portfolio-card h4 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .portfolio-card p {
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 1.25rem;
+    }
+
+    .portfolio-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .portfolio-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.6rem;
+      padding: 0.2rem 0.6rem;
+      background: rgba(81, 112, 255, 0.08);
+      border: 1px solid rgba(81, 112, 255, 0.12);
+      border-radius: 999px;
+      color: var(--primary-light);
+      letter-spacing: 0.3px;
+    }
+
     /* ─── BANNER ─── */
     .banner {
       background: var(--surface);
@@ -1312,6 +1403,9 @@
         border-color: rgba(81,112,255,0.25);
         box-shadow: 0 0 20px rgba(81,112,255,0.1);
       }
+      .portfolio-card:hover {
+        transform: translateY(-3px);
+      }
       .business-card:hover {
         transform: translateY(-3px);
         border-color: rgba(81,112,255,0.2);
@@ -1430,6 +1524,7 @@
       .problem-card:hover { transform: none; }
       .method-step:hover { transform: none; }
       .market-card:hover { transform: none; }
+      .portfolio-card:hover { transform: none; }
       .business-card:hover { transform: none; }
     }
 
@@ -1441,6 +1536,7 @@
       .problems-grid { grid-template-columns: 1fr 1fr; }
       .methodology-flow { grid-template-columns: repeat(3, 1fr); }
       .market-grid { grid-template-columns: 1fr 1fr; }
+      .portfolio-intro { grid-template-columns: 1fr; }
     }
 
     @media (max-width: 768px) {
@@ -1482,6 +1578,8 @@
       .methodology-flow { grid-template-columns: 1fr; }
       .solution-grid { grid-template-columns: 1fr; }
       .market-grid { grid-template-columns: 1fr; }
+      .portfolio-grid { grid-template-columns: 1fr; }
+      .portfolio-card { padding: 1.75rem 1.25rem; }
       .business-grid { grid-template-columns: 1fr; }
       .contact-grid { grid-template-columns: 1fr; }
       .form-row { grid-template-columns: 1fr; }
@@ -1557,6 +1655,7 @@
       <li><a href="#problems">Problemas</a></li>
       <li><a href="#solution">Solución</a></li>
       <li><a href="#methodology">Metodología</a></li>
+      <li><a href="#portfolio">Portafolio</a></li>
       <li><a href="#contact" class="nav-cta">Contáctanos</a></li>
     </ul>
   </nav>
@@ -1763,6 +1862,60 @@
     </a>
   </section>
 
+  <!-- ─── PORTFOLIO ─── -->
+  <section id="portfolio">
+    <div class="section-w">
+      <span class="section-tag reveal">Portafolio</span>
+      <h2 class="section-title reveal">Proyectos que hablan por sí solos</h2>
+      <div class="portfolio-intro">
+        <p class="reveal">Estos son algunos de los proyectos donde hemos aplicado inteligencia artificial y automatización para generar resultados reales en negocios como el tuyo.</p>
+        <p class="reveal">Cada solución fue diseñada a la medida, integrada con las herramientas existentes y optimizada para generar impacto desde el primer día.</p>
+      </div>
+      <div class="portfolio-grid reveal" data-stagger="80">
+        <div class="portfolio-card stagger-item">
+          <div class="portfolio-card-badge">Automatización de procesos</div>
+          <h4>CRM y Reportes Comerciales Automatizados</h4>
+          <p>Integración de datos de ventas, generación automática de informes semanales y sincronización con herramientas de facturación.</p>
+          <div class="portfolio-tags">
+            <span class="portfolio-tag">Python</span>
+            <span class="portfolio-tag">APIs</span>
+            <span class="portfolio-tag">SQL</span>
+          </div>
+        </div>
+        <div class="portfolio-card stagger-item">
+          <div class="portfolio-card-badge">Agentes de IA</div>
+          <h4>Asistente Virtual de Atención al Cliente</h4>
+          <p>Agente conversacional entrenado con el historial y políticas de la empresa, capaz de resolver consultas y escalar casos complejos.</p>
+          <div class="portfolio-tags">
+            <span class="portfolio-tag">IA</span>
+            <span class="portfolio-tag">NLP</span>
+            <span class="portfolio-tag">WhatsApp API</span>
+          </div>
+        </div>
+        <div class="portfolio-card stagger-item">
+          <div class="portfolio-card-badge">Paneles de decisión</div>
+          <h4>Dashboard de Indicadores Financieros</h4>
+          <p>Plataforma en tiempo real con visualización de KPIs, alertas inteligentes y proyecciones automatizadas para la toma de decisiones.</p>
+          <div class="portfolio-tags">
+            <span class="portfolio-tag">Power BI</span>
+            <span class="portfolio-tag">ETL</span>
+            <span class="portfolio-tag">SQL</span>
+          </div>
+        </div>
+        <div class="portfolio-card stagger-item">
+          <div class="portfolio-card-badge">Automatización de procesos</div>
+          <h4>Workflow de Aprobaciones Automatizado</h4>
+          <p>Sistema que reemplazó 12 horas semanales de gestión manual de aprobaciones por un flujo automatizado con reglas de negocio inteligentes.</p>
+          <div class="portfolio-tags">
+            <span class="portfolio-tag">No-Code</span>
+            <span class="portfolio-tag">APIs</span>
+            <span class="portfolio-tag">Webhooks</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ─── METHODOLOGY ─── -->
   <section id="methodology">
     <div class="section-w">
@@ -1961,6 +2114,7 @@
       <li><a href="#about">Quiénes somos</a></li>
       <li><a href="#solution">Solución</a></li>
       <li><a href="#methodology">Metodología</a></li>
+      <li><a href="#portfolio">Portafolio</a></li>
       <li><a href="#contact">Contacto</a></li>
       <li><a href="https://www.instagram.com/weare.mods" target="_blank" rel="noopener noreferrer">Instagram</a></li>
     </ul>
